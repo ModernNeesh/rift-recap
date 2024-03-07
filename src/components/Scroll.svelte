@@ -1,8 +1,8 @@
 <script>
   import Scroller from "@sveltejs/svelte-scroller";
   import SearchBar from "./SearchBar.svelte";
-  import Line from "./Line.svelte";
-  import Bar from "./Bar.svelte";
+  import Line from "./line.svelte";
+  import Bar from "./bar.svelte";
   import { onMount } from "svelte";
 
   //Variables for champion counts, gold over time data, and color scheme
