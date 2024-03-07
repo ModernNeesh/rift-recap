@@ -17,6 +17,10 @@
   },
   "type": "module",
   "dependencies": {
-    "d3": "^7.8.5"
+    "@sveltejs/svelte-scroller": "^2.0.7",
+    "@sveltestrap/sveltestrap": "^6.2.5",
+    "d3": "^7.8.5",
+    "i": "^0.3.7",
+    "npm": "^10.5.0"
   }
 }
