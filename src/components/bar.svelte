@@ -1,13 +1,14 @@
 <script>
     import * as d3 from 'd3';
+    import { onMount } from 'svelte';
 
     export let champ_data;
+    export let color;
 
     //Add for debugging
-    //let champ_data = {'Yone': 1, 'Aatrox': 3, 'Sett' : 2};
+    //let champ_data = {'Yone': 1, 'Aatrox': 3, 'SEtt' : 4, 'dasd' : 3, 'asda sc' : 2, 'dawed' : 3} ;
     //let color;
 
-    export let color;
     // set the dimensions and margins of the graph
     const width = 1100;
     const height = 600;
@@ -35,8 +36,6 @@
             .range([marginBottom, height - marginTop - 10])
             .domain(Object.keys(champ_data))
             .padding(.1);
-    
-
     // x-axis
     $: gx = d3
         .select(gx)
@@ -44,9 +43,10 @@
 
     // y-axis
     $: gy = d3.select(gy)
-        .call(d3.axisLeft(y))
+        .call(d3.axisLeft(y));
     //Add for debugging
     //$: color = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.values(champ_data));
+
 </script>
 
 <main>
@@ -84,16 +84,19 @@
               <rect
                 x = {x(0)}
                 y = {y(champ[0])}
-                width = {x(champ[1])}
-                height = {y.bandwidth()}
+                width = {x(champ[1]) - (marginLeft + 100)}
+                style:height = {y.bandwidth()}
                 fill = {color(champ[0])}
               />
           {/each}
-      </g>
+        </g>
     </svg>
   </div>
 </main>
 
 <style>
-    
+    rect {
+		transition: height 10s;
+		position: absolute;
+	}
 </style>
