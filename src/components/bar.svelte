@@ -30,7 +30,7 @@
     let x = d3
         .scaleLinear()
         .domain([0, d3.max(Object.values(champ_data)) + 1])
-        .range([marginLeft , width - marginRight]);
+        .range([marginLeft + 50, width - marginRight]);
     // Y axis
     let y = d3
             .scaleBand()
@@ -88,7 +88,7 @@
             </g>
             
             <!-- y-axis -->
-            <g bind:this={gy} transform="translate({marginLeft },0)">
+            <g bind:this={gy} transform="translate({marginLeft + 50},0)">
             </g>
         <!-- lines -->
         <g bind:this={bars}>
@@ -96,7 +96,7 @@
               <rect
                 x = {x(0)}
                 y = {y(champ[0])}
-                style:width = {(x(champ[1]) - (marginLeft))}
+                style:width = {(x(champ[1]) - (marginLeft + 50))}
                 height = {y.bandwidth()}
                 fill = {color(champ[0])}
               >

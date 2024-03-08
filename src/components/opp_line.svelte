@@ -1,9 +1,9 @@
 <script>
     import * as d3 from 'd3';
 
+
     export let opponent_data;
     export let color;
-
 
     const width = 1100;
     const height = 600;
@@ -11,6 +11,7 @@
     const marginRight = 30;
     const marginBottom = 30;
     const marginLeft = 40;
+
 
     let svg_line;
     let svg_legend;
@@ -90,7 +91,7 @@
     for (let i = 0; i < opponent_data.length; i++){
         coords.push([x(opponent_data[i].time), y(opponent_data[i].gold)]);
     }
-    
+
     function onPointerMove(event) {
         // find the closest point to the pointer, euclidean distance
         let pointer = d3.pointer(event);

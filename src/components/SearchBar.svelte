@@ -20,7 +20,7 @@
   let gameName;
   let tagLine;
   let loading = false;
-  const NUM_MATCHES = 2;
+  const NUM_MATCHES = 20;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 
@@ -321,7 +321,6 @@
     const opponent_champs = Array.from((d3.group(clean_opp_gold_data, d => d.champion)).keys());
     const all_champs = Object.values(champs_played_data).concat(opponent_champs).concat(['Your Average'])
 
-
     let random_colors = [];
 
     all_champs.forEach(champ =>{
@@ -335,6 +334,8 @@
     dispatch('sending_data', {gold_data: clean_gold_data, champ_data: champs_played_data, opponent_data: clean_opp_gold_data.concat(overall_data), color: color_scheme});
     loading = false;
   }
+
+
 </script>
 
 <main>

@@ -4,7 +4,6 @@
     export let gold_data;
     export let color;
 
-
     const width = 1100;
     const height = 600;
     const marginTop = 20;
@@ -90,7 +89,8 @@
     for (let i = 0; i < gold_data.length; i++){
         coords.push([x(gold_data[i].time), y(gold_data[i].gold)]);
     }
-    
+
+
     function onPointerMove(event) {
         // find the closest point to the pointer, euclidean distance
         let pointer = d3.pointer(event);
