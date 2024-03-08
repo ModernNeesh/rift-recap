@@ -6,7 +6,7 @@
     export let color;
 
     //Add for debugging
-    //let champ_data = {'Yone': 1, 'Aatrox': 3, 'SEtt' : 4, 'dasd' : 3, 'asda sc' : 2, 'dawed' : 3} ;
+    //let champ_data = {'Yone': 1, 'Aatrox': 3, 'Sett' : 4, 'Darius' : 3, 'Chogath' : 2, 'Briar' : 3} ;
     //let color;
 
     // set the dimensions and margins of the graph
@@ -15,9 +15,10 @@
     const marginTop = 20;
     const marginRight = 30;
     const marginBottom = 30;
-    const marginLeft = 40;
+    const marginLeft = 50;
 
     let svg_bar;
+    let svg_icons;
     let bars;
 
     // Placeholders for the axis elements.
@@ -29,7 +30,7 @@
     let x = d3
         .scaleLinear()
         .domain([0, d3.max(Object.values(champ_data)) + 1])
-        .range([marginLeft + 100, width - marginRight]);
+        .range([marginLeft , width - marginRight]);
     // Y axis
     let y = d3
             .scaleBand()
@@ -46,11 +47,21 @@
         .call(d3.axisLeft(y));
     //Add for debugging
     //$: color = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.values(champ_data));
-
+    
+    
 </script>
 
 <main>
   <div class = 'bar_graph'>
+    <svg 
+    bind:this = {svg_icons}
+    width = "100"
+    {height}
+    viewBox="0 0 {100} {height}"
+    style="max-width: 100%; height: auto;">
+        
+    </svg>
+
     <svg
     bind:this={svg_bar}
     {width}
@@ -60,6 +71,7 @@
     >
             <!-- x-axis -->
             <g 
+                
                 bind:this={gx}
                 transform="translate(0,{height - marginBottom})" 
             >
@@ -76,7 +88,7 @@
             </g>
             
             <!-- y-axis -->
-            <g bind:this={gy} transform="translate({marginLeft + 100},0)">
+            <g bind:this={gy} transform="translate({marginLeft },0)">
             </g>
         <!-- lines -->
         <g bind:this={bars}>
@@ -84,19 +96,22 @@
               <rect
                 x = {x(0)}
                 y = {y(champ[0])}
-                width = {x(champ[1]) - (marginLeft + 100)}
-                style:height = {y.bandwidth()}
+                style:width = {(x(champ[1]) - (marginLeft))}
+                height = {y.bandwidth()}
                 fill = {color(champ[0])}
-              />
+              >
+                </rect>
           {/each}
         </g>
     </svg>
+
+
   </div>
 </main>
 
 <style>
     rect {
-		transition: height 10s;
+		transition: width 1s;
 		position: absolute;
 	}
 </style>

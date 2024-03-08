@@ -3,11 +3,13 @@
   import SearchBar from "./SearchBar.svelte";
   import Line from "./line.svelte";
   import Bar from "./bar.svelte";
+  import OppLine from "./opp_line.svelte";
   import { onMount } from "svelte";
 
-  //Variables for champion counts, gold over time data, and color scheme
+  //Variables for champion counts, gold over time data, opponent data, and color scheme
   let champ_data;
   let gold_data;
+  let opponent_data;
   let color;
 
   let to_change = {'MonkeyKing' : 'Wukong',
@@ -37,8 +39,8 @@
   function get_data(event){
     gold_data = event.detail.gold_data;
     champ_data = event.detail.champ_data;
+    opponent_data = event.detail.opponent_data;
     color = event.detail.color;
-    console.log(champ_data);
   }
 
   onMount(async () => {
@@ -93,7 +95,9 @@
     {/if}
     </section>
     <section>
-      <img id = 'icon' src="champion_icons/Aatrox.png" alt='aatrox'>
+      {#if opponent_data}
+        <OppLine {opponent_data} {color}/>
+      {/if}  
     </section>
   </div>
 

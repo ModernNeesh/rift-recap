@@ -25,6 +25,13 @@
   const validRegions = ["americas", "asia", "europe", "sea"];
 
 
+  /*
+    API CALL FUNCTIONS
+    --------------------
+
+    The below functions all just call the api for specific requests
+  */
+
   async function get_puuid_by_name_tag(region, gameName, tagLine) {
     // Construct the API URL with the appropriate path parameters
     const apiUrl = `https://4i6m73advi.execute-api.us-west-1.amazonaws.com/rgapi/account/${region}/${gameName}/${tagLine}`;
@@ -121,6 +128,12 @@
     }
   }
 
+  /*
+    HELPER FUNCTIONS
+    -----------------
+
+    The below functions all assist in the data cleaning process
+  */
 
   function get_participant(participants, puuid){//Function to get the id of a participant given their puuid
     let id = -1;
@@ -132,8 +145,9 @@
     return id;
   }
 
-  function champ_map(match_detail){//Map puuids in a match to champions played. For certain champions, change the names.
+  function champ_map_and_role(match_detail, puuid){//Map puuids in a match to champions played. For certain champions, change the names. Also return player's role
     let champ_names = {};
+    let role = "";
     match_detail['participants'].forEach(player =>{
       let champ = player['championName'];
       if(Object.keys(to_change).includes(champ)){
@@ -142,31 +156,67 @@
       else{
         champ_names[player['puuid']] = player['championName']
       }
+      if (player['puuid'] == puuid){
+        role = player['teamPosition'];
+      }
     });
-    return champ_names;
+    return [champ_names, role];
   }
 
-  function get_match_gold(match_detail, match_timeline, puuid){ //Gets the gold data for one match given a puuid
+  function get_role_opponent(match_detail, puuid, role){//Get puuid of role opponent
+    let opp = "";
+    match_detail['participants'].forEach(player =>{
+      if(role == player['teamPosition'] && puuid != player['puuid']){
+        opp = player['puuid'];
+      }
+    });
+    return opp;
+  }
+
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+
+  /*
+    DATA CLEANING FUNCTIONS 
+    -------------------------
+
+    The below functions all carry out the data cleaning process
+  */
+
+
+  function get_match_gold(match_detail, match_timeline, puuid){ //Gets the gold data (player's and opponent's) for one match given a puuid
     //Get the participant ID of the given person
     let participant = get_participant(match_timeline['participants'], puuid);
 
     //Map each player's puuid in the match to the champion they were playing
-    let champ_names = champ_map(match_detail);
+    let [champ_names, role] = champ_map_and_role(match_detail, puuid);
 
+    let opponent = get_role_opponent(match_detail, puuid, role);
+    let opponent_participant = get_participant(match_timeline['participants'], opponent);
 
     //Create the data for the player's gold over time for this game
     let times = {};
+    let opponent_times = {};
     match_timeline['frames'].forEach(frame => {
       times[[champ_names[puuid], Math.round(frame['timestamp'] / 60000)]] = [frame['participantFrames'][`${participant}`]['totalGold']];
+      opponent_times[[champ_names[opponent], Math.round(frame['timestamp'] / 60000)]] = [frame['participantFrames'][`${opponent_participant}`]['totalGold']];
     })
-    return times;
+    return [times, opponent_times];
   }
 
-  function get_all_gold_data(match_ids, match_details, match_timelines, puuid){
+
+  function get_all_gold_data(match_ids, match_details, match_timelines, puuid){//Get 
     let gold_over_time = {};
+    let opp_gold_over_time = {};
 
     for (let match_id of match_ids) {
-      let match_times = get_match_gold(match_details[match_id], match_timelines[match_id], puuid);
+      let [match_times, opponent_times] = get_match_gold(match_details[match_id], match_timelines[match_id], puuid);
 
       //For each key (such as [Aatrox, 5]) append the value of the gold if it exists and create a new key for it if not.
       for (let key in match_times) {
@@ -177,15 +227,23 @@
         }
       }
 
+      //Do the same for opponents
+      for (let key in opponent_times) {
+        if (opp_gold_over_time.hasOwnProperty(key)) { 
+          opp_gold_over_time[key] = opp_gold_over_time[key].concat(opponent_times[key]); 
+        } else { 
+          opp_gold_over_time[key] = opponent_times[key]; 
+        }
+      }
     }
-    return gold_over_time;
+    return [gold_over_time, opp_gold_over_time];
   }
 
   function get_all_champ_data(match_ids, match_details, puuid){
     let champs_played = {};
 
     for (let match_id of match_ids) {
-      let champ_names = champ_map(match_details[match_id]);
+      let champ_names = champ_map_and_role(match_details[match_id])[0];
       let champ = champ_names[puuid];
 
       if (champs_played.hasOwnProperty(champ)) { 
@@ -213,6 +271,20 @@
     return clean_data;
   }
   
+  function get_overall_gold(reformatted_data){
+    let map = d3.group(reformatted_data, d => d.time);
+    const average = array => array.reduce((a, b) => a + b) / array.length;
+    let overall_data = [];
+    map.forEach(element => {
+      let this_element = {};
+      let times = element.map(function (el) { return el.gold; });
+      this_element['time'] = element[0]['time'];
+      this_element['champion'] = 'Your Average';
+      this_element['gold'] = average(times);
+      overall_data.push(this_element);
+    });
+    return overall_data;
+  }
 
   async function tally_data() {
 
@@ -235,15 +307,32 @@
     //get champ data for bar graph
     const champs_played_data = get_all_champ_data(match_ids, match_details, puuid);
     
-    // get gold data for line graph
-    const gold_over_time_data = get_all_gold_data(match_ids, match_details, match_timelines, puuid);
+    
 
+    // get gold data for line graph
+    const [gold_over_time_data, opp_gold_data] = get_all_gold_data(match_ids, match_details, match_timelines, puuid);
+
+    
 
     const clean_gold_data = reformat_gold_data(gold_over_time_data);
+    const overall_data = get_overall_gold(clean_gold_data);
+    const clean_opp_gold_data = reformat_gold_data(opp_gold_data);
 
-    const color_scheme = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.values(champs_played_data));
+    const opponent_champs = Array.from((d3.group(clean_opp_gold_data, d => d.champion)).keys());
+    const all_champs = Object.values(champs_played_data).concat(opponent_champs).concat(['Your Average'])
 
-    dispatch('sending_data', {gold_data: clean_gold_data, champ_data: champs_played_data, color: color_scheme});
+
+    let random_colors = [];
+
+    all_champs.forEach(champ =>{
+      let color = getRandomColor();
+      random_colors.push(color);
+    });
+
+    const color_scheme = d3.scaleOrdinal().domain(all_champs).range(random_colors);
+
+
+    dispatch('sending_data', {gold_data: clean_gold_data, champ_data: champs_played_data, opponent_data: clean_opp_gold_data.concat(overall_data), color: color_scheme});
     loading = false;
   }
 </script>
