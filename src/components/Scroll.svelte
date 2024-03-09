@@ -6,7 +6,6 @@
   import OppLine from "./opp_line.svelte";
   import { onMount } from "svelte";
   import * as d3 from 'd3';
-  import Stats from "../../../dsc106_final_project_fork/src/components/Stats.svelte";
   import Recap from "./Recap.svelte";
 
 
