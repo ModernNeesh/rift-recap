@@ -9,13 +9,35 @@
   export let runes;
 
   import * as d3 from 'd3';
-
-  // import data
-  import runes_data from '../data/runes_flattened.json';
-  import valid_item_icons from '../data/valid_item_icons.json';
-
   import { onMount } from 'svelte';
 
+  // import data
+  // import runes_data from '../data/runes_flattened.json';
+  // import valid_item_icons from '../data/valid_item_icons.json';
+
+
+  let legendary_items;
+  let valid_item_icons;
+  let most_picked_5_items;
+  let runes_data;
+  let most_picked_5_runes;
+  let isDataLoaded = false; // Track if data has been loaded
+  onMount(async () => {
+    const runesDataResponse = await fetch('runes_flattened.json');
+    runes_data = await runesDataResponse.json();
+    const validItemIconsResponse = await fetch('valid_item_icons.json');
+    valid_item_icons = await validItemIconsResponse.json();
+    
+    legendary_items = Object.keys(items).filter(key => valid_item_icons.includes(key)).reduce((acc, key) => {
+      acc[key] = items[key];
+      return acc;
+    }, {});
+
+    most_picked_5_items = Object.entries(legendary_items).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    most_picked_5_runes = Object.entries(runes).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    isDataLoaded = true;
+  });
 
   // process data
   let most_kill = kda.sort((a, b) => b.kills - a.kills)[0];
@@ -25,17 +47,7 @@
   let most_damage_taken = Object.entries(damage_taken).sort((a, b) => b[1] - a[1])[0];
   let longest_match_time = Object.entries(match_time).sort((a, b) => b[1] - a[1])[0];
   let best_critical_strike = Object.entries(critical_strike).sort((a, b) => b[1] - a[1])[0];
-  // first filter out the non-legendary items
-  let legendary_items = Object.keys(items).reduce((acc, key) => {
-      if (valid_item_icons.includes(key)) {
-        acc[key] = items[key];
-      }
-      return acc;
-    }, {});
-  // console.log(legendary_items);
-  // then sort the items by the number of times picked and get the top 5
-  let most_picked_5_items = Object.entries(legendary_items).sort((a, b) => b[1] - a[1]).slice(0, 5)
-  let most_picked_5_runes = Object.entries(runes).sort((a, b) => b[1] - a[1]).slice(0, 5)
+
 
 
   // console.log(most_kill);
