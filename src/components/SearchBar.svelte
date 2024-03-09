@@ -20,7 +20,7 @@
   let gameName;
   let tagLine;
   let loading = false;
-  const NUM_MATCHES = 20;
+  const NUM_MATCHES = 10;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 
@@ -286,6 +286,81 @@
     return overall_data;
   }
 
+  // data processing for stats
+  function match_detail_statistics(match_ids, match_details, puuid) {
+    // console.log(match_ids);
+    // console.log(match_details);
+    // console.log(puuid);
+
+    let position = {};
+    let role = {};
+    let kda = [];
+    let damage_dealt_to_champ = {};
+    let damage_taken = {};
+    let match_time = {};
+    let critical_strike = {};
+    let items = {};
+    let runes = {};
+
+    for (let match_id of match_ids) {
+      let participant_id = match_details[match_id].participants.findIndex(participant => participant.puuid === puuid);
+      let champ_name = match_details[match_id].participants[participant_id].championName;
+
+
+      // get position data
+      let p = match_details[match_id].participants[participant_id].individualPosition;
+      if (position.hasOwnProperty(p)){
+        position[p] += 1;
+      } else {
+        position[p] = 1;
+      }
+      // get kda data
+      kda.push({
+        'champ': champ_name,
+        'kills': match_details[match_id].participants[participant_id].kills,
+        'deaths': match_details[match_id].participants[participant_id].deaths,
+        'assists': match_details[match_id].participants[participant_id].assists
+      });
+      // get damage dealt to champ data
+      damage_dealt_to_champ[champ_name] = match_details[match_id].participants[participant_id].totalDamageDealtToChampions;
+      // get damage taken data
+      damage_taken[champ_name] = match_details[match_id].participants[participant_id].totalDamageTaken;
+      // get match time data
+      match_time[champ_name] = match_details[match_id].participants[participant_id].timePlayed;
+      // get critical strike data
+      critical_strike[champ_name] = match_details[match_id].participants[participant_id].largestCriticalStrike;
+      // get item data
+      for (let i = 0; i < 7; i++){
+        let item = match_details[match_id].participants[participant_id][`item${i}`];
+        if (items.hasOwnProperty(item)){
+          items[item] += 1;
+        } else {
+          items[item] = 1;
+        }
+      }
+      // get rune data
+      let ru = match_details[match_id].participants[participant_id].perks.styles[0].selections[0].perk
+      if (runes.hasOwnProperty(ru)){
+        runes[ru] += 1;
+      } else {
+        runes[ru] = 1;
+      }
+    }
+      
+
+    // console.log(position);
+    // console.log(kda);
+    // console.log(damage_dealt_to_champ);
+    // console.log(damage_taken);
+    // console.log(match_time);
+    // console.log(critical_strike);
+    // console.log(items);
+    // console.log(runes);
+
+    // send data to the next component
+    dispatch('recap_data', {position: position, kda: kda, damage_dealt_to_champ: damage_dealt_to_champ, damage_taken: damage_taken, match_time: match_time, critical_strike: critical_strike, items: items, runes: runes});
+  }
+
   async function tally_data() {
 
     loading = true;
@@ -303,6 +378,9 @@
     /*
       Add new data processing function here
     */
+
+    // get recap data
+    match_detail_statistics(match_ids, match_details, puuid);
 
     //get champ data for bar graph
     const champs_played_data = get_all_champ_data(match_ids, match_details, puuid);

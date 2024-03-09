@@ -6,6 +6,8 @@
   import OppLine from "./opp_line.svelte";
   import { onMount } from "svelte";
   import * as d3 from 'd3';
+  import Stats from "../../../dsc106_final_project_fork/src/components/Stats.svelte";
+  import Recap from "./Recap.svelte";
 
 
   //Variables for champion counts, gold over time data, opponent data, and color scheme
@@ -57,6 +59,18 @@
 
     [early, late, overall] = calculateBestAndWorst(gold_data);
     [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data);
+  }
+
+  let position, kda, damage_dealt_to_champ, damage_taken, match_time, critical_strike, items, runes;
+  function get_stats(event){
+    position = event.detail.position;
+    kda = event.detail.kda;
+    damage_dealt_to_champ = event.detail.damage_dealt_to_champ;
+    damage_taken = event.detail.damage_taken;
+    match_time = event.detail.match_time;
+    critical_strike = event.detail.critical_strike;
+    items = event.detail.items;
+    runes = event.detail.runes;
   }
 
   /*
@@ -163,7 +177,12 @@
 
 
   <div class="foreground" slot="foreground">
-    <section id="firstSection"><SearchBar {to_change} on:sending_data = {get_data}/></section>
+    <section id="firstSection"><SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/></section>
+    <section>
+      {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
+        <Recap position={position} kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
+      {/if}
+    </section>
     <section>
       {#if champ_data}
         <Bar {champ_data} {color} />
