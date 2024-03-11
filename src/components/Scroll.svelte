@@ -45,6 +45,10 @@
                     'TwistedFate': 'Twisted Fate',
                     'XinZhao' : 'Xin Zhao'};
 
+  let icon_map = Object.fromEntries(Object.entries(to_change).map(([key, value]) => [value, key]));
+
+  let champ_names;
+
   let count, index, offset, progress;
   let width, height;
   let readme;
@@ -58,6 +62,19 @@
 
     [early, late, overall] = calculateBestAndWorst(gold_data);
     [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data);
+
+    function replace_average(minmax){
+      if(minmax['min'] == 'Your Average'){
+        minmax['min'] = 'none of the champions';
+      }
+      if(minmax['max'] == 'Your Average'){
+        minmax['max'] = 'none of the champions';
+      }
+    }
+
+    replace_average(early_counter);
+    replace_average(late_counter);
+    replace_average(overall_counter);
   }
 
   let position, kda, damage_dealt_to_champ, damage_taken, match_time, critical_strike, items, runes;
@@ -72,6 +89,17 @@
     runes = event.detail.runes;
   }
 
+  onMount(async () => {
+    let champ_names_re = await fetch('champ_names.json');
+    champ_names = new Set(Object.keys(await champ_names_re.json()));
+    let changed_names = new Set(Object.keys(icon_map));
+    let unchanged_names = champ_names.difference(changed_names);
+    let unchanged_obj = Object.fromEntries(Array.from(unchanged_names).map(key => [key, key]));
+    Object.assign(icon_map, unchanged_obj);
+    icon_map['Leblanc'] = 'Leblanc';
+    delete icon_map['LeBlanc'];
+    icon_map['none of the champions'] = 'None';
+  })
   /*
     HELPER FUNCTIONS FOR LINE GRAPHS
     --------------------------------------
@@ -110,7 +138,7 @@
             early_game_gold[champ] = riemannSum(0, 14, champ_gold);
             late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold);
             overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold);
-
+            
             if(early_game_gold[champ]){
                 if (early_game_gold[champ] > early_game_gold[early_game['max']] || !early_game_gold[early_game['max']]){//If the early game is better than the current best
                     early_game['max'] = champ;
@@ -138,6 +166,7 @@
                 }
             }
         });
+        console.log(overall_gold);
         return [early_game, late_game, overall];
     }
 
@@ -162,21 +191,12 @@
     bind:clientHeight={height}
     bind:clientWidth={width}
   >
-    <div class="progress-bars">
-      <p>Currect Section: <strong>{index+1}/{count}</strong></p>
-      <progress value={count ? (index+1)/count : 0} />
-
-      <p>offset in currect section</p>
-      <progress value={offset || 0} />
-
-      <p>total progress</p>
-      <progress value={progress || 0} />
-    </div>
   </div>
 
 
   <div class="foreground" slot="foreground">
-    <section id="firstSection"><SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/></section>
+    <section id="firstSection">
+      <SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/></section>
     <section>
       {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
         <Recap position={position} kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
@@ -194,17 +214,20 @@
     {/if}
     </section>
 
-    <section>
+    <section class = "midsection">
+      <p class = "header">Strongest and Weakest champions</p>
       {#if early}
-        Your weakest early game champion is <img class = "icon" src = "champion_icons/{early['min']}.png" alt = "{early['min']}" width ="20" height = "20"> {early['min']}, 
-        and your strongest early game champion is <img class = "icon" src = "champion_icons/{early['max']}.png" alt = "{early['max']}" width ="20" height = "20"> {early['max']}.
+        <p>
+        Your weakest early game champion is <img class = "icon" src = "champion_icons/{icon_map[early['min']]}.png" alt = "{early['min']}" width ="20" height = "20"> {early['min']}, 
+        and your strongest early game champion is <img class = "icon" src = "champion_icons/{icon_map[early['max']]}.png" alt = "{early['max']}" width ="20" height = "20"> {early['max']}.
 
 
-        Your weakest late game champion is <img class = "icon" src = "champion_icons/{late['min']}.png" alt = "{late['min']}" width ="20" height = "20">{late['min']}, 
-        and your strongest late game champion is <img class = "icon" src = "champion_icons/{late['max']}.png" alt = "{late['max']}" width ="20" height = "20">{late['max']}.
+        Your weakest late game champion is <img class = "icon" src = "champion_icons/{icon_map[late['min']]}.png" alt = "{late['min']}" width ="20" height = "20"> {late['min']}, 
+        and your strongest late game champion is <img class = "icon" src = "champion_icons/{icon_map[late['max']]}.png" alt = "{late['max']}" width ="20" height = "20"> {late['max']}.
 
-        Your <img class = "icon" src = "champion_icons/{overall['min']}.png" alt = "{overall['min']}" width ="20" height = "20">{overall['min']} gameplay is consistently the worst out of your champion pool, 
-        while your <img class = "icon" src = "champion_icons/{overall['max']}.png" alt = "{overall['max']}" width ="20" height = "20">{overall['max']} gameplay is consistently the strongest.
+        Your <img class = "icon" src = "champion_icons/{icon_map[overall['min']]}.png" alt = "{icon_map[overall['min']]}" width ="20" height = "20"> {overall['min']} gameplay is consistently the worst out of your champion pool, 
+        while your <img class = "icon" src = "champion_icons/{icon_map[overall['max']]}.png" alt = "{icon_map[overall['max']]}" width ="20" height = "20"> {overall['max']} gameplay is consistently the strongest.
+        </p>
       {/if}
     </section>
 
@@ -212,6 +235,39 @@
       {#if opponent_data}
         <OppLine {opponent_data} {color}/>
       {/if}  
+    </section>
+
+    <section class = "midsection">
+      <p class = "header">Easiest and Hardest Lane matchups</p>
+      {#if early}
+        <p>
+        Your easiest laning phase matchup is  <img class = "icon" src = "champion_icons/{icon_map[early_counter['min']]}.png" alt = "{early_counter['min']}" width ="20" height = "20"> {early_counter['min']}, 
+        and your hardest laning phase matchup is <img class = "icon" src = "champion_icons/{icon_map[early_counter['max']]}.png" alt = "{early_counter['max']}" width ="20" height = "20"> {early_counter['max']}.
+
+        You do the best in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['min']]}.png" alt = "{late_counter['min']}" width ="20" height = "20"> {late_counter['min']}, 
+        and you struggle the most in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['max']]}.png" alt = "{late_counter['max']}" width ="20" height = "20"> {late_counter['max']}.
+
+        Overall, you have the easiest time against <img class = "icon" src = "champion_icons/{icon_map[overall_counter['min']]}.png" alt = "{icon_map[overall_counter['min']]}" width ="20" height = "20"> {overall_counter['min']}, 
+        while you get countered hardest by <img class = "icon" src = "champion_icons/{icon_map[overall_counter['max']]}.png" alt = "{icon_map[overall_counter['max']]}" width ="20" height = "20"> {overall_counter['max']}.
+        </p>
+      {/if}
+    </section>
+
+    <section>
+      <p class = "header">How To Improve</p>
+
+      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Irelia.png" alt = "Sett" width ="20" height = "20"> Irelia:
+        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Irelia in your champion pool.</span>
+        <span class=li>Try to play for the lead more around the 3 minute mark, as that is when you tend to have the biggest advantage.</span>
+      </p>
+      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Tryndamere.png" alt = "Sett" width ="20" height = "20"> Tryndamere:
+        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Tryndamere in your champion pool.</span>
+        <span class=li>Try to play for the lead more around the 39 minute mark, as that is when you tend to have the biggest advantage.</span>
+      </p>
+      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Fiora.png" alt = "Sett" width ="20" height = "20"> Fiora:
+        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Fiora in your champion pool.</span>
+        <span class=li>Try to play for the lead more around the 3 minute mark, as that is when you tend to have the biggest advantage.</span>
+      </p>
     </section>
   </div>
 
@@ -226,7 +282,7 @@
     width: 100%;
     height: 100vh;
     position: relative;
-    outline: green solid 3px;
+    background-color: rgb(126, 130, 145);
   }
 
   .foreground {
@@ -234,37 +290,65 @@
     margin: 0 auto;
     height: auto;
     position: relative;
-    outline: red solid 3px;
+    color: rgb(41, 49, 65);
   }
 
-  .progress-bars {
-    position: absolute;
-    background: rgba(170, 51, 120, 0.2) /*  40% opaque */;
-    visibility: visible;
+  .header{
+    font-size: 30 px;
+    font-weight: bold;
   }
 
   section {
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.2); /* 20% opaque */
+    background-color: rgb(174, 179, 197); /* 20% opaque */
     /* color: white; */
-    outline: magenta solid 3px;
     text-align: center;
-    max-width: 100%; /* adjust at will */
-    color: black;
-    padding: 1em;
-    margin: 0 0 2em 0;
-    font-size: 12 px;
+    max-width: 100%; 
+    color: rgb(30, 29, 29);
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+    font-size: 20 px;
+    line-height: 200%;
+    font-weight: bold;
+    
+  }
+
+  .midsection {
+    height: 50vh;
+    background-color: rgb(174, 179, 197); /* 20% opaque */
+    /* color: white; */
+    text-align: center;
+    max-width: 100%; 
+    color: rgb(30, 29, 29);
+    padding: 0.5em;
+    margin: 0 0 0.5em 0;
+    font-size: 20 px;
+    line-height: 200%;
+    font-weight: bold;
+    
   }
 
   #firstSection {
     display: flex;
     justify-content: center;
+    text-align: center;
   }
 
   .icon {
     display: inline;
     position: relative;
   }
+
+  .counter {
+  width: 32%;
+  text-align: left;
+  font-size: 14 px;
+  font-weight: bold;
+  margin: 5em 5em 5em 5em;
+  }
+
+
+  span.li  {display: list-item; margin-left: 2em}
 
   
 </style>
