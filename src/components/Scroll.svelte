@@ -266,7 +266,7 @@
       </p>
       <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Fiora.png" alt = "Sett" width ="20" height = "20"> Fiora:
         <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Fiora in your champion pool.</span>
-        <span class=li>Try to play for the lead more around the 3 minute mark, as that is when you tend to have the biggest advantage.</span>
+        <span class=li>Try to play for the lead more around the 30 minute mark, as that is when you tend to have the biggest advantage.</span>
       </p>
     </section>
   </div>
