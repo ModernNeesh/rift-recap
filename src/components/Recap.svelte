@@ -1,5 +1,4 @@
 <script>
-  export let position;
   export let kda;
   export let damage_dealt_to_champ;
   export let damage_taken;

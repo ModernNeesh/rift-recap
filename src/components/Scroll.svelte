@@ -228,7 +228,7 @@
         </div>
       {/if}
     </section>
-    <section>
+    <section id="graph">
       {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
       {#if index+1==3 & offset>=0.2}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
@@ -260,7 +260,7 @@
     <section class = "midsection">
       {#if early}
       {#if index+1==6 & offset>=0.2}
-        <h4 class = "header">Is Your</h4>
+        <h4 class = "header">Champion Pool Analysis</h4>
 
         <div class="performance-wrapper">
 
@@ -343,23 +343,57 @@
       {/if}  
     </section>
 
-    <section class = "midsection">
-      <p class = "header">Easiest and Hardest Lane matchups</p>
+    <section class="midsection">
       {#if early}
-        <p>
-        Your easiest laning phase matchup is  <img class = "icon" src = "champion_icons/{icon_map[early_counter['min']]}.png" alt = "{early_counter['min']}"> {early_counter['min']}, 
-        and your hardest laning phase matchup is <img class = "icon" src = "champion_icons/{icon_map[early_counter['max']]}.png" alt = "{early_counter['max']}"> {early_counter['max']}.
-
-        You do the best in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['min']]}.png" alt = "{late_counter['min']}"> {late_counter['min']}, 
-        and you struggle the most in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['max']]}.png" alt = "{late_counter['max']}"> {late_counter['max']}.
-
-        Overall, you have the easiest time against <img class = "icon" src = "champion_icons/{icon_map[overall_counter['min']]}.png" alt = "{icon_map[overall_counter['min']]}"> {overall_counter['min']}, 
-        while you get countered hardest by <img class = "icon" src = "champion_icons/{icon_map[overall_counter['max']]}.png" alt = "{icon_map[overall_counter['max']]}"> {overall_counter['max']}.
-        </p>
+      {#if index+1==8 & offset>=0.2}
+        <h4 class="header">Matchups Analysis</h4>
+    
+        <div class="performance-wrapper">
+          <div class="champ-icon-wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <img class="icon" src="champion_icons/{icon_map[early_counter['min']]}.png" alt="{early_counter['min']}" width="50" height="50">
+            <img class="icon" src="champion_icons/{icon_map[early_counter['max']]}.png" alt="{early_counter['max']}" width="50" height="50">
+            <img class="icon" src="champion_icons/{icon_map[late_counter['min']]}.png" alt="{late_counter['min']}" width="50" height="50">
+            <img class="icon" src="champion_icons/{icon_map[late_counter['max']]}.png" alt="{late_counter['max']}" width="50" height="50">
+            <img class="icon" src="champion_icons/{icon_map[overall_counter['min']]}.png" alt="{overall_counter['min']}" width="50" height="50">
+            <img class="icon" src="champion_icons/{icon_map[overall_counter['max']]}.png" alt="{overall_counter['max']}" width="50" height="50">
+          </div>
+    
+          <div class="champ-name-wrapper" transition:fly={{ delay: 200, duration: 500, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <div class="champ-name">{early_counter['min']}</div>
+            <div class="champ-name">{early_counter['max']}</div>
+            <div class="champ-name">{late_counter['min']}</div>
+            <div class="champ-name">{late_counter['max']}</div>
+            <div class="champ-name">{overall_counter['min']}</div>
+            <div class="champ-name">{overall_counter['max']}</div>
+          </div>
+    
+          <div class="stage-wrapper">
+            <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Easiest Laning Against</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 600, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Hardest Laning Against</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 800, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Easiest Late Game Against</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1000, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Hardest Late Game Against</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1200, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Overall Best Against</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Overall Worst Against</p>
+            </div>
+          </div>
+        </div>
+      {/if}
       {/if}
     </section>
+    
 
-    <section>
+    <section id="improvement">
       <p class = "header">How To Improve</p>
 
       <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Irelia.png" alt = "Sett" width ="20" height = "20"> Irelia:
@@ -498,13 +532,6 @@
     text-align: center;
   }
 
-  .graph {
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    height: 100vh;
-  }
-
   .performance-wrapper {
     display: flex;
     text-align: center;
@@ -550,10 +577,17 @@
 
   .champ-name {
     display: flex;
-    justify-content: center;
+    justify-content: left;
     text-align: center;
     margin-top: 15px;
     font-size: 25px;
+    width: 130px;
+  }
+
+
+
+  #improvement {
+    height: 150vh;
   }
 
   

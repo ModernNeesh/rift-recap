@@ -183,6 +183,7 @@
 </script>
 
 <main>
+    <h2>Opponent Gold Accumulation Over Time</h2>
     <div class="line-plot">
             
         <svg
@@ -257,7 +258,7 @@
             {#if tooltipPt}
             <g transform="translate({limit_x_pos(x(tooltipPt.time))},{limit_y_pos(y(tooltipPt.gold)-50)})" text-anchor="middle">
                 <text 
-                    font-size="12px"
+                    font-size="15px"
                     dy="0"
                     opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
                     font-weight="500"
@@ -266,7 +267,7 @@
                 </text>
 
                 <text
-                    font-size="12px"
+                    font-size="15px"
                     dy="1.2em"
                     opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
                     font-weight="500"
@@ -275,7 +276,7 @@
                 </text>
 
                 <text 
-                    font-size="12px" 
+                    font-size="15px" 
                     dy="2.4em"
                     opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
                     font-weight="500"
