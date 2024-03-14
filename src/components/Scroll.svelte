@@ -471,6 +471,15 @@
     height: 100vh;
     position: relative;
     outline: green solid 3px;
+    background-color:#ff99e4;
+    background-image:
+    radial-gradient(at 95% 62%, hsla(215,84%,65%,1) 0px, transparent 50%),
+    radial-gradient(at 59% 78%, hsla(348,98%,70%,1) 0px, transparent 50%),
+    radial-gradient(at 82% 36%, hsla(266,96%,73%,1) 0px, transparent 50%),
+    radial-gradient(at 43% 16%, hsla(177,89%,62%,1) 0px, transparent 50%),
+    radial-gradient(at 43% 68%, hsla(96,75%,76%,1) 0px, transparent 50%),
+    radial-gradient(at 10% 30%, hsla(245,76%,68%,1) 0px, transparent 50%),
+    radial-gradient(at 96% 93%, hsla(156,65%,67%,1) 0px, transparent 50%);
   }
 
   .foreground {
@@ -478,7 +487,7 @@
     margin: 0 auto;
     height: auto;
     position: relative;
-    outline: red solid 3px;
+    outline: 1px solid black;
   }
 
   .progress-bars {
@@ -494,14 +503,11 @@
 
   section {
     height: 80vh;
-    background-color: rgba(0, 0, 0, 0.2); /* 20% opaque */
-    /* color: white; */
-    outline: magenta solid 3px;
+    background-color: rgba(189, 207, 206, 0.212);
     text-align: center;
     max-width: 100%; /* adjust at will */
     color: black;
     padding: 1em;
-    margin: 0 0 2em 0;
   }
 
   #firstSection {
