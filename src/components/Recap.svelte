@@ -66,9 +66,8 @@
 </script>
 
 <main>
-  <h1>Recap</h1>
-  
   <div class="recap">
+    <h2>Recap</h2>
     <div class="match_highlights">
       <div class="highlights_wrapper">
         <div class="champ_icon_wrapper">
@@ -116,7 +115,7 @@
     </div>
 
     <div class="most_picked_items">
-      <h1>MOST PICKED ITEMS</h1>
+      <h5>MOST PICKED ITEMS</h5>
       {#if most_picked_5_items}
         <div class="item_wrapper">
           {#each most_picked_5_items as item, i}
@@ -130,7 +129,7 @@
     </div>
 
     <div class="most_picked_runes">
-      <h1>MOST PICKED RUNES</h1>
+      <h5>MOST PICKED RUNES</h5>
       {#if most_picked_5_runes}
         <div class="rune_wrapper">
           {#each most_picked_5_runes as rune, i}
@@ -165,7 +164,7 @@
     display: flex;
     width: 90%;
     justify-content: center;
-    border: 1px solid black;
+    margin-bottom: 5%;
   }
 
   .highlights_wrapper {
@@ -173,7 +172,7 @@
     flex-direction: row;
     justify-content: center;
     gap: 20px;
-    border: 1px solid red;
+    align-items: center;
   }
 
   .champ_icon_wrapper {
@@ -182,7 +181,6 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    border: 1px solid blue;
   }
 
   .most_picked_items {
@@ -190,7 +188,7 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
-    border: 1px solid black;
+    margin-bottom: 5%;
   }
 
   .most_picked_runes {
@@ -198,7 +196,6 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
-    border: 1px solid black;
   }
 
   .item_wrapper {
@@ -206,7 +203,6 @@
     justify-content: center;
     flex-direction: row;
     gap: 20px;
-    border: 1px solid red;
   }
 
   .rune_wrapper {
@@ -218,8 +214,8 @@
 
 
   #champ_icon {
-    width: 120px;
-    height: 120px;
+    width: 60px;
+    height: 60px;
   }
 
   #rune_icon {
@@ -232,7 +228,12 @@
     height: 60px;
   }
 
-  
+  div.champ_icon_wrapper p {
+    margin: 0px;
+    white-space: nowrap;
+    font-size: small;
+  }
+
 
   
 </style>

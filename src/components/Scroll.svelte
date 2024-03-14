@@ -8,6 +8,9 @@
   import * as d3 from 'd3';
   import Recap from "./Recap.svelte";
 
+  import {fly, draw} from "svelte/transition";
+  import {cubicInOut} from "svelte/easing";
+
 
   //Variables for champion counts, gold over time data, opponent data, and color scheme
   let champ_data;
@@ -191,49 +194,152 @@
     bind:clientHeight={height}
     bind:clientWidth={width}
   >
+  <div class="progress-bars">
+    <p>Currect Section: <strong>{index+1}/{count}</strong></p>
+    <progress value={count ? (index+1)/count : 0} />
+
+    <p>offset in currect section</p>
+    <progress value={offset || 0} />
+
+    <p>total progress</p>
+    <progress value={progress || 0} />
+  </div>
   </div>
 
 
   <div class="foreground" slot="foreground">
+    <section id="intro">
+      {#if index!=1}
+        <div class="description" transition:fly={{ delay: 0, duration: 300, x: 0, y: -20, opacity: 0.5, easing: cubicInOut }}>
+          <h1>Welcome to LoLStatsPro!</h1>
+          <p>
+            LoLStatsPro is an analytics platform for League of Legends players seeking to elevate their game.
+            We provide personalized, in-depth visualizations of your gameplay data, from your champion performance to win-rate trends over time.
+            Our aim is to help you understand your strengths, pinpoint your weaknesses, and guide your journey to becoming a better player.
+            Whether you're a casual gamer or a competitive player, LoLStatsPro offers the insights you need to improve your strategy, champion mastery, and overall gameplay.
+          </p>
+        </div>
+      {/if}
+    </section>
     <section id="firstSection">
-      <SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/></section>
-    <section>
-      {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
-        <Recap position={position} kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
+      {#if index+1==2 & offset>=0.1}
+        <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
+          <SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/>
+        </div>
       {/if}
     </section>
     <section>
+      {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
+      {#if index+1==3 & offset>=0.2}
+        <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
+          <Recap position={position} kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
+        </div>
+      {/if}
+      {/if}
+    </section>
+    <section class="graph">
       {#if champ_data}
-        <Bar {champ_data} {color} />
+      {#if index+1==4 & offset>=0.2}
+        <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
+          <Bar {champ_data} {color} />
+        </div>
+      {/if}
       {/if}
     </section>
 
-    <section>    
+    <section class="graph">
     {#if gold_data}
-      <Line {gold_data} {color}/>
+    {#if index+1==5 & offset>=0.2}
+      <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
+        <Line {gold_data} {color}/>
+      </div>
+    {/if}
     {/if}
     </section>
 
     <section class = "midsection">
-      <p class = "header">Strongest and Weakest champions</p>
       {#if early}
-        <p>
-        Your weakest early game champion is <img class = "icon" src = "champion_icons/{icon_map[early['min']]}.png" alt = "{early['min']}" width ="20" height = "20"> {early['min']}, 
-        and your strongest early game champion is <img class = "icon" src = "champion_icons/{icon_map[early['max']]}.png" alt = "{early['max']}" width ="20" height = "20"> {early['max']}.
+      {#if index+1==6 & offset>=0.2}
+        <h4 class = "header">Is Your</h4>
 
+        <div class="performance-wrapper">
 
-        Your weakest late game champion is <img class = "icon" src = "champion_icons/{icon_map[late['min']]}.png" alt = "{late['min']}" width ="20" height = "20"> {late['min']}, 
-        and your strongest late game champion is <img class = "icon" src = "champion_icons/{icon_map[late['max']]}.png" alt = "{late['max']}" width ="20" height = "20"> {late['max']}.
+          <div class="champ-icon-wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[early['min']]}.png" alt = "{early['min']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[early['max']]}.png" alt = "{early['max']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[late['min']]}.png" alt = "{late['min']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[late['max']]}.png" alt = "{late['max']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[overall['min']]}.png" alt = "{icon_map[overall['min']]}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[overall['max']]}.png" alt = "{icon_map[overall['max']]}" width ="50" height = "50">
+            </div>
+          </div>
 
-        Your <img class = "icon" src = "champion_icons/{icon_map[overall['min']]}.png" alt = "{icon_map[overall['min']]}" width ="20" height = "20"> {overall['min']} gameplay is consistently the worst out of your champion pool, 
-        while your <img class = "icon" src = "champion_icons/{icon_map[overall['max']]}.png" alt = "{icon_map[overall['max']]}" width ="20" height = "20"> {overall['max']} gameplay is consistently the strongest.
-        </p>
+          <div class="champ-name-wrapper" transition:fly={{ delay: 200, duration: 500, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <div class="champ-name">
+              {early['min']}
+            </div>
+            <div class="champ-name">
+              {early['max']}
+            </div>
+            <div class="champ-name">
+              {late['min']}
+            </div>
+            <div class="champ-name">
+              {late['max']}
+            </div>
+            <div class="champ-name">
+              {overall['min']}
+            </div>
+            <div class="champ-name">
+              {overall['max']}
+            </div>
+          </div>
+
+          <div class="stage-wrapper">
+            <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Weakest Early Game Champion</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 600, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Strongest Early Game Champion</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 800, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Weakest Late Game Champion</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1000, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Strongest Late Game Champion</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1200, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Worst Champion Consistently</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 1400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Strongest Champion Consistently</p>
+            </div>
+          </div>
+
+        </div>
+        
+      {/if}
       {/if}
     </section>
 
-    <section>
+    <section class="graph">
       {#if opponent_data}
-        <OppLine {opponent_data} {color}/>
+      {#if index+1==7}
+        <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
+          <OppLine {opponent_data} {color}/>
+        </div>
+      {/if}
       {/if}  
     </section>
 
@@ -241,14 +347,14 @@
       <p class = "header">Easiest and Hardest Lane matchups</p>
       {#if early}
         <p>
-        Your easiest laning phase matchup is  <img class = "icon" src = "champion_icons/{icon_map[early_counter['min']]}.png" alt = "{early_counter['min']}" width ="20" height = "20"> {early_counter['min']}, 
-        and your hardest laning phase matchup is <img class = "icon" src = "champion_icons/{icon_map[early_counter['max']]}.png" alt = "{early_counter['max']}" width ="20" height = "20"> {early_counter['max']}.
+        Your easiest laning phase matchup is  <img class = "icon" src = "champion_icons/{icon_map[early_counter['min']]}.png" alt = "{early_counter['min']}"> {early_counter['min']}, 
+        and your hardest laning phase matchup is <img class = "icon" src = "champion_icons/{icon_map[early_counter['max']]}.png" alt = "{early_counter['max']}"> {early_counter['max']}.
 
-        You do the best in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['min']]}.png" alt = "{late_counter['min']}" width ="20" height = "20"> {late_counter['min']}, 
-        and you struggle the most in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['max']]}.png" alt = "{late_counter['max']}" width ="20" height = "20"> {late_counter['max']}.
+        You do the best in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['min']]}.png" alt = "{late_counter['min']}"> {late_counter['min']}, 
+        and you struggle the most in the late game against <img class = "icon" src = "champion_icons/{icon_map[late_counter['max']]}.png" alt = "{late_counter['max']}"> {late_counter['max']}.
 
-        Overall, you have the easiest time against <img class = "icon" src = "champion_icons/{icon_map[overall_counter['min']]}.png" alt = "{icon_map[overall_counter['min']]}" width ="20" height = "20"> {overall_counter['min']}, 
-        while you get countered hardest by <img class = "icon" src = "champion_icons/{icon_map[overall_counter['max']]}.png" alt = "{icon_map[overall_counter['max']]}" width ="20" height = "20"> {overall_counter['max']}.
+        Overall, you have the easiest time against <img class = "icon" src = "champion_icons/{icon_map[overall_counter['min']]}.png" alt = "{icon_map[overall_counter['min']]}"> {overall_counter['min']}, 
+        while you get countered hardest by <img class = "icon" src = "champion_icons/{icon_map[overall_counter['max']]}.png" alt = "{icon_map[overall_counter['max']]}"> {overall_counter['max']}.
         </p>
       {/if}
     </section>
@@ -277,20 +383,74 @@
 
 <style>
   @import 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
+
+  :root{
+  /** CSS DARK THEME PRIMARY COLORS */
+  --color-primary-100: #382bf0;
+  --color-primary-200: #5e43f3;
+  --color-primary-300: #7a5af5;
+  --color-primary-400: #9171f8;
+  --color-primary-500: #a688fa;
+  --color-primary-600: #ba9ffb;
+  /** CSS DARK THEME SURFACE COLORS */
+  --color-surface-100: #121212;
+  --color-surface-200: #282828;
+  --color-surface-300: #3f3f3f;
+  --color-surface-400: #575757;
+  --color-surface-500: #717171;
+  --color-surface-600: #8b8b8b;
+  /** CSS DARK THEME MIXED SURFACE COLORS */
+  --color-surface-mixed-100: #211938;
+  --color-surface-mixed-200: #372e4c;
+  --color-surface-mixed-300: #4d4560;
+  --color-surface-mixed-400: #645d75;
+  --color-surface-mixed-500: #7c758b;
+  --color-surface-mixed-600: #958fa1;
+  }
+
+  #intro {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .description{
+    margin: 0 auto;
+    height: auto;
+    position: relative;
+    padding: 1em;
+  }
+
+  .description h1{
+    margin-top: 20%;
+    margin-bottom: 10%;
+  }
+
+  #intro {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
   
   .background {
     width: 100%;
     height: 100vh;
     position: relative;
-    background-color: rgb(126, 130, 145);
+    outline: green solid 3px;
   }
 
   .foreground {
-    width: 100%;
+    width: 70%;
     margin: 0 auto;
     height: auto;
     position: relative;
-    color: rgb(41, 49, 65);
+    outline: red solid 3px;
+  }
+
+  .progress-bars {
+    position: absolute;
+    background: rgba(170, 51, 120, 0.2) /*  40% opaque */;
+    visibility: visible;
   }
 
   .header{
@@ -299,33 +459,15 @@
   }
 
   section {
-    height: 100vh;
-    background-color: rgb(174, 179, 197); /* 20% opaque */
+    height: 80vh;
+    background-color: rgba(0, 0, 0, 0.2); /* 20% opaque */
     /* color: white; */
+    outline: magenta solid 3px;
     text-align: center;
-    max-width: 100%; 
-    color: rgb(30, 29, 29);
-    padding: 0.5em;
-    margin: 0 0 0.5em 0;
-    font-size: 20 px;
-    line-height: 200%;
-    font-weight: bold;
-    
-  }
-
-  .midsection {
-    height: 50vh;
-    background-color: rgb(174, 179, 197); /* 20% opaque */
-    /* color: white; */
-    text-align: center;
-    max-width: 100%; 
-    color: rgb(30, 29, 29);
-    padding: 0.5em;
-    margin: 0 0 0.5em 0;
-    font-size: 20 px;
-    line-height: 200%;
-    font-weight: bold;
-    
+    max-width: 100%; /* adjust at will */
+    color: black;
+    padding: 1em;
+    margin: 0 0 2em 0;
   }
 
   #firstSection {
@@ -349,6 +491,70 @@
 
 
   span.li  {display: list-item; margin-left: 2em}
+
+  .anim_wrapper {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .graph {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    height: 100vh;
+  }
+
+  .performance-wrapper {
+    display: flex;
+    text-align: center;
+    align-items: center;
+  }
+
+  .stage-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    gap: 43px;
+    margin-left: 12%;
+    margin-top: 5px;
+    font-size: 25px;
+    overflow: hidden;
+  }
+
+  .champ-icon-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    gap: 20px;
+    margin-right: 10px;
+    margin-left: 23%;
+  }
+
+
+  img.icon {
+    width: 75px;
+    height: 75px;
+  }
+
+  .champ-name-wrapper {
+    display: flex;
+    flex-direction: column;
+    margin-top: -20px;
+    text-align: left;
+    line-height: 500%;
+  }
+
+
+  .champ-name {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 15px;
+    font-size: 25px;
+  }
 
   
 </style>

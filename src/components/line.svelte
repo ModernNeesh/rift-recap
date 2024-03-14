@@ -159,185 +159,213 @@
         .on('pointermove pointerenter', onPointerMove)
         .on('pointerleave', onPointerLeave);
 
+    function limit_x_pos(x){
+        if (x<100) {
+            return 100;
+        } else if (x > 1000){
+            return 1000;
+        } else {
+            return x;
+        }
+    }
+
+    function limit_y_pos(y){
+        if (y<50) {
+            return 50;
+        } else if (y > 500){
+            return 500;
+        } else {
+            return y;
+        }
+    }
 </script>
 
 <main>
     <div class="line-plot">
-            
-        <svg
-            bind:this={svg_line}
-            {width}
-            {height}
-            viewBox="0 0 {width} {height}"
-            style="max-width: 100%; height: auto;"
-        >
-        
-            <!-- x-axis -->
-            <g 
-                bind:this={gx}
-                transform="translate(0,{height - marginBottom})" 
+        <div class="line-wrapper">
+            <svg
+                bind:this={svg_line}
+                {width}
+                {height}
+                viewBox="0 0 {width} {height}"
+                style="max-width: 100%; height: auto;"
             >
-                <text
-                    x={width-70}
-                    y="{-10}"
-                    dy="0.32em"
-                    fill="#000"
-                    font-weight="bold"
-                    text-anchor="start"
+            
+                <!-- x-axis -->
+                <g 
+                    bind:this={gx}
+                    transform="translate(0,{height - marginBottom})" 
                 >
-                    Minutes
-                </text>
-            </g>
-            
-            <!-- y-axis -->
-            <g bind:this={gy} transform="translate({marginLeft},0)">
-                <text
-                    x="5"
-                    y="{marginTop}"
-                    font-weight="bold"
-                    fill="black"
-                    text-anchor="start"
-                >
-                    Earned Gold
-                </text>
-            </g>
-            
-        <!-- lines -->
-        <g bind:this={lines}>
-            {#each grouped as d, i}
-                <path
-                    key={i}
-                    d={line(d[1])}
-                    stroke={d[0] === "Overall" ? "black" : color(d[0])}
-                    stroke-width={checked_champs[d[0]] === true ? "2": "0"}
-                    fill="none"
-                    champ={d[0]}
-                    stroke-opacity=.75
-                />
-            {/each}
-        </g>
-            
-            <!-- points -->
-            <g bind:this={points} stroke="#000" stroke-opacity="0.2">
-                {#each gold_data as d, i}
-                    <circle
-                        key={i}
-                        cx={x(d.time)}
-                        cy={y(d.gold)}
-                        r="1.5"
+                    <text
+                        x={width-70}
+                        y="{-10}"
+                        dy="0.32em"
+                        fill="#000"
+                        font-weight="bold"
+                        text-anchor="start"
+                    >
+                        Minutes
+                    </text>
+                </g>
+                
+                <!-- y-axis -->
+                <g bind:this={gy} transform="translate({marginLeft},0)">
+                    <text
+                        x="5"
+                        y="{marginTop}"
+                        font-weight="bold"
                         fill="black"
-                        opacity="0"
-                        champ={d.champion}
+                        text-anchor="start"
+                    >
+                        Earned Gold
+                    </text>
+                </g>
+                
+            <!-- lines -->
+            <g bind:this={lines}>
+                {#each grouped as d, i}
+                    <path
+                        key={i}
+                        d={line(d[1])}
+                        stroke={d[0] === "Overall" ? "black" : color(d[0])}
+                        stroke-width={checked_champs[d[0]] === true ? "2": "0"}
+                        fill="none"
+                        champ={d[0]}
+                        stroke-opacity=1
                     />
                 {/each}
             </g>
-
-            <!-- tooltip -->
-            {#if tooltipPt}
-            <g transform="translate({x(tooltipPt.time)},{y(tooltipPt.gold)-50})" text-anchor="middle">
-                <text 
-                    font-size="12px"
-                    dy="0"
-                    opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
-                    font-weight="500"
-                >
-                    {tooltipPt.champion}
-                </text>
-
-                <text
-                    font-size="12px"
-                    dy="1.2em"
-                    opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
-                    font-weight="500"
-                >
-                    {tooltipPt.time} minutes
-                </text>
-
-                <text 
-                    font-size="12px" 
-                    dy="2.4em"
-                    opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
-                    font-weight="500"
-                >
-                    {Math.round(tooltipPt.gold)} gold
-                </text>
-            </g>
-            {/if}
-
-            
-        </svg>
-
-        <svg
-            bind:this={svg_legend}
-            width={200}
-            {height}
-            viewBox="0 0 {200} {height}"
-            style="max-width: 100%; height: auto;"
-        >
-            <!-- legend -->
-            <g transform="translate(10, 0)">
-                <text
-                    y={marginTop}
-                    font-size="12"
-                    font-weight="bold"
-                    fill="black"
-                    text-anchor="start"
-                >
-                    Champion
-                </text>
-
-                {#each grouped as d, i}
-                    <g transform="translate(0, {40 + i * 20} )">
-                        <rect
-                            class="button"
-                            width="10"
-                            height="10"
-                            fill={d[0] === "Overall" && checked_champs[d[0]] === true ? "black" : checked_champs[d[0]] === true ? color(d[0]) : "white"}
-                            stroke = "black"
-                            id = "{d} rect" 
-                            on:click = {uncheck_champ(d)}
+                
+                <!-- points -->
+                <g bind:this={points} stroke="#000" stroke-opacity="0.2">
+                    {#each gold_data as d, i}
+                        <circle
+                            key={i}
+                            cx={x(d.time)}
+                            cy={y(d.gold)}
+                            r="2.5"
+                            fill="black"
+                            opacity="0"
+                            champ={d.champion}
                         />
+                    {/each}
+                </g>
+
+                <!-- tooltip -->
+                {#if tooltipPt}
+                <g transform="translate({limit_x_pos(x(tooltipPt.time))},{limit_y_pos(y(tooltipPt.gold)-50)})" text-anchor="middle">
+                    <text 
+                        font-size="12px"
+                        dy="0"
+                        opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
+                        font-weight="500"
+                    >
+                        {tooltipPt.champion}
+                    </text>
+                    
+
+                    <text
+                        font-size="12px"
+                        dy="1.2em"
+                        opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
+                        font-weight="500"
+                    >
+                        {tooltipPt.time} minutes
+                    </text>
+
+                    <text 
+                        font-size="12px" 
+                        dy="2.4em"
+                        opacity={checked_champs[tooltipPt.champion] === true ? "1": "0"}
+                        font-weight="500"
+                    >
+                        {Math.round(tooltipPt.gold)} gold
+                    </text>
+                </g>
+                {/if}
+
+            </svg>
+            
+        </div>
+        
+        <div class="legend-wrapper">
+            <svg
+                bind:this={svg_legend}
+                width={200}
+                {height}
+                viewBox="0 0 {200} {height}"
+                style="max-width: 100%; height: auto;"
+            >
+                <!-- legend -->
+                <g transform="translate(10, 0)">
+                    <text
+                        y={marginTop}
+                        font-size="12"
+                        font-weight="bold"
+                        fill="black"
+                        text-anchor="start"
+                    >
+                        Champion
+                    </text>
+
+                    {#each grouped as d, i}
+                        <g transform="translate(0, {40 + i * 20} )">
+                            <rect
+                                class="button"
+                                width="10"
+                                height="10"
+                                fill={d[0] === "Overall" && checked_champs[d[0]] === true ? "black" : checked_champs[d[0]] === true ? color(d[0]) : "white"}
+                                stroke = "black"
+                                id = "{d} rect" 
+                                on:click = {uncheck_champ(d)}
+                            />
+                            <text
+                                x="15"
+                                y="10"
+                                font-size="12"
+                                font-weight="auto"
+                                fill="black"
+                                text-anchor="start"
+                            >
+                                {d[0]}
+                            </text>
+                        </g>
+                    {/each}
+                    
+                    <!-- Select / Deselect All -->
+                    <g transform = "translate(5, {50 + grouped.size*20} )">
+                        <circle
+                            class="button"
+                            r="10" 
+                            stroke = "black" 
+                            fill={select_deselect_all === true ? "lightblue": "white"}
+                            on:click = {uncheck_all}
+                        />
+
                         <text
                             x="15"
-                            y="10"
+                            y="5"
                             font-size="12"
                             font-weight="auto"
                             fill="black"
                             text-anchor="start"
                         >
-                            {d[0]}
+                            Select / Deselect All
                         </text>
                     </g>
-                {/each}
-                
-                <!-- Select / Deselect All -->
-                <g transform = "translate(5, {50 + grouped.size*20} )">
-                    <circle
-                        class="button"
-                        r="10" 
-                        stroke = "black" 
-                        fill={select_deselect_all === true ? "lightblue": "white"}
-                        on:click = {uncheck_all}
-                    />
 
-                    <text
-                        x="15"
-                        y="5"
-                        font-size="12"
-                        font-weight="auto"
-                        fill="black"
-                        text-anchor="start"
-                    >
-                        Select / Deselect All
-                    </text>
                 </g>
 
-            </g>
-
-            
-
-        </svg>
+            </svg>
+        </div>
     </div>
+
+    {#if tooltipPt}
+        <img
+            src={`champion_icons/${(tooltipPt.champion).replace(/\s+/g, '')}.png`}
+            alt={tooltipPt.champion}
+        />
+    {/if}
     
 </main>
 
@@ -347,10 +375,24 @@
     user-select: none;
 }
 
+.line-plot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 
 .button {
     cursor: pointer;
 }
+
+img{
+    width: 50px;
+    height: 50px;
+    position: relative;
+    top: -425px;
+    left: -430px;
+}
+
 
 </style>

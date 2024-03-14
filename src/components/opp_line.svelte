@@ -160,6 +160,26 @@
         .on('pointermove pointerenter', onPointerMove)
         .on('pointerleave', onPointerLeave);
 
+
+    function limit_x_pos(x){
+        if (x<100) {
+            return 100;
+        } else if (x > 1000){
+            return 1000;
+        } else {
+            return x;
+        }
+    }
+
+    function limit_y_pos(y){
+        if (y<50) {
+            return 50;
+        } else if (y > 500){
+            return 500;
+        } else {
+            return y;
+        }
+    }
 </script>
 
 <main>
@@ -213,7 +233,7 @@
                     stroke-width={checked_champs[d[0]] === true ? "2": "0"}
                     fill="none"
                     champ={d[0]}
-                    stroke-opacity=.75
+                    stroke-opacity=1
                 />
             {/each}
         </g>
@@ -225,7 +245,7 @@
                         key={i}
                         cx={x(d.time)}
                         cy={y(d.gold)}
-                        r="1.5"
+                        r="2.5"
                         fill="black"
                         opacity="0"
                         champ={d.champion}
@@ -235,7 +255,7 @@
 
             <!-- tooltip -->
             {#if tooltipPt}
-            <g transform="translate({x(tooltipPt.time)},{y(tooltipPt.gold)-50})" text-anchor="middle">
+            <g transform="translate({limit_x_pos(x(tooltipPt.time))},{limit_y_pos(y(tooltipPt.gold)-50)})" text-anchor="middle">
                 <text 
                     font-size="12px"
                     dy="0"
@@ -339,6 +359,15 @@
 
         </svg>
     </div>
+
+    {#if tooltipPt}
+        {#if tooltipPt.champion !== "Your Average"}
+            <img
+                src={`champion_icons/${(tooltipPt.champion).replace(/\s+/g, '')}.png`}
+                alt={tooltipPt.champion}
+            />
+        {/if}
+    {/if}
     
 </main>
 
@@ -348,10 +377,22 @@
     user-select: none;
 }
 
-
+.line-plot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 .button {
     cursor: pointer;
+}
+
+img{
+    width: 50px;
+    height: 50px;
+    position: relative;
+    top: -425px;
+    left: -430px;
 }
 
 </style>

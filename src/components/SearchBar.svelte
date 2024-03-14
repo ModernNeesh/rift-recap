@@ -7,7 +7,12 @@
     InputGroup,
     InputGroupText,
     Input,
-    Spinner
+    Spinner,
+    Button,
+    Modal,
+    ModalBody,
+    ModalFooter,
+    ModalHeader
   } from '@sveltestrap/sveltestrap';
   import {createEventDispatcher} from 'svelte';
   import * as d3 from 'd3';
@@ -20,7 +25,7 @@
   let gameName;
   let tagLine;
   let loading = false;
-  const NUM_MATCHES = 20;
+  const NUM_MATCHES = 2;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 
@@ -410,8 +415,13 @@
 
 
     dispatch('sending_data', {gold_data: clean_gold_data, champ_data: champs_played_data, opponent_data: clean_opp_gold_data.concat(overall_data), color: color_scheme});
+    // reenable the search button
     loading = false;
   }
+
+
+  let isModalOpen = false;
+  const toggleModal = () => (isModalOpen = !isModalOpen);
 
 
 </script>
@@ -441,17 +451,37 @@
       </InputGroup>
     </div>
 
-      <button id="searchbutton" type="button" class="btn btn-primary" disabled={loading} on:click={()=>{
-        //Setting the account to Faker's just for checkpoint purposes, can be erased later
+    <button id="searchbutton" type="button" class="btn btn-primary" disabled={loading} on:click={toggleModal}>Search</button>
 
-        tally_data();
-      }}>Search</button>
+    <Modal isOpen={isModalOpen} backdrop="static" {toggleModal}>
+      <ModalHeader {toggleModal}>Important!</ModalHeader>
+      <ModalBody>
+        Search will take a long time, please be patient.
+      </ModalBody>
+      <ModalFooter>
+        <Button color="primary" on:click={()=>{
+          tally_data();
+          toggleModal();
+        }}>Ok</Button>
+        <Button color="secondary" on:click={toggleModal}>Cancel</Button>
+      </ModalFooter>
+    </Modal>
 
+  </div>
+
+  <div class="no_account">
+    <button id="searchbutton" type="button" class="btn btn-primary" disabled={loading} on:click={()=>{
+      region = "asia";
+      gameName = "Hide on bush";
+      tagLine = "KR1";
+
+      tally_data();
+    }}>Click here if you don't have a Riot account</button>
   </div>
   
   <div id = "spinner">
     {#if loading}
-      <Spinner type="border" color="primary" />
+      <Spinner type="border" color="primary"/>
     {/if}
   </div>
   
@@ -469,7 +499,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: var(--grey-bg);
+  background-color: var(--color-surface-mixed-200);
   border-radius: 50px;
   padding: 10px 20px;
   gap: 10px;
@@ -498,5 +528,20 @@
   position: relative;
   top: 35%;
 }
+
+.no_account {
+  position: relative;
+  top: 32%;
+}
+
+#searchbutton {
+  background-color: var(--color-primary-500);
+  border: none;
+}
+
+Input{
+  background-color: white;
+}
+
 
 </style>

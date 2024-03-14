@@ -53,14 +53,6 @@
 
 <main>
   <div class = 'bar_graph'>
-    <svg 
-    bind:this = {svg_icons}
-    width = "100"
-    {height}
-    viewBox="0 0 {100} {height}"
-    style="max-width: 100%; height: auto;">
-        
-    </svg>
 
     <svg
     bind:this={svg_bar}
@@ -110,8 +102,16 @@
 </main>
 
 <style>
-    rect {
+  rect {
 		transition: width 1s;
 		position: absolute;
 	}
+
+  .bar_graph {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    padding: 0px;
+  }
 </style>
