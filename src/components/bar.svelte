@@ -106,12 +106,4 @@
 		transition: width 1s;
 		position: absolute;
 	}
-
-  .bar_graph {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0px;
-    padding: 0px;
-  }
 </style>

@@ -10,6 +10,11 @@
 
   import {fly, draw} from "svelte/transition";
   import {cubicInOut} from "svelte/easing";
+  import {
+    Card,
+    CardBody,
+    CardText,
+  } from '@sveltestrap/sveltestrap';
 
 
   //Variables for champion counts, gold over time data, opponent data, and color scheme
@@ -70,10 +75,17 @@
 
     function replace_average(minmax){
       if(minmax['min'] == 'Your Average'){
+<<<<<<< HEAD
         minmax['min'] = 'none';
       }
       if(minmax['max'] == 'Your Average'){
         minmax['max'] = 'none';
+=======
+        minmax['min'] = 'None';
+      }
+      if(minmax['max'] == 'Your Average'){
+        minmax['max'] = 'None';
+>>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
       }
     }
 
@@ -82,9 +94,8 @@
     replace_average(overall_counter);
   }
 
-  let position, kda, damage_dealt_to_champ, damage_taken, match_time, critical_strike, items, runes;
+  let kda, damage_dealt_to_champ, damage_taken, match_time, critical_strike, items, runes;
   function get_stats(event){
-    position = event.detail.position;
     kda = event.detail.kda;
     damage_dealt_to_champ = event.detail.damage_dealt_to_champ;
     damage_taken = event.detail.damage_taken;
@@ -106,7 +117,11 @@
     Object.assign(icon_map, unchanged_obj);
     icon_map['Leblanc'] = 'Leblanc';
     delete icon_map['LeBlanc'];
+<<<<<<< HEAD
     icon_map['none'] = 'None';
+=======
+    icon_map['None'] = 'None';
+>>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
   })
   /*
     HELPER FUNCTIONS FOR LINE GRAPHS
@@ -203,9 +218,6 @@
 </script>
 
 <main>
-  <header>
-
-  </header>
   <Scroller
     top={0.0}
     bottom={1}
@@ -221,6 +233,15 @@
     bind:clientHeight={height}
     bind:clientWidth={width}
   >
+  {#if index+1==2 && offset>=0.2}
+    <div>
+      <Card theme="dark">
+        <CardBody>
+          <CardText>Search will take a while, please be patient!</CardText>
+        </CardBody>
+      </Card>
+    </div>
+  {/if}
   <div class="progress-bars">
     <p>Currect Section: <strong>{index+1}/{count}</strong></p>
     <progress value={count ? (index+1)/count : 0} />
@@ -238,33 +259,37 @@
     <section id="intro">
       {#if index!=1}
         <div class="description" transition:fly={{ delay: 0, duration: 300, x: 0, y: -20, opacity: 0.5, easing: cubicInOut }}>
-          <h1>Welcome to LoLStatsPro!</h1>
+          <h1>Welcome to our website</h1>
           <p>
-            LoLStatsPro is an analytics platform for League of Legends players seeking to elevate their game.
-            We provide personalized, in-depth visualizations of your gameplay data, from your champion performance to win-rate trends over time.
-            Our aim is to help you understand your strengths, pinpoint your weaknesses, and guide your journey to becoming a better player.
-            Whether you're a casual gamer or a competitive player, LoLStatsPro offers the insights you need to improve your strategy, champion mastery, and overall gameplay.
+            If you're a League of Legends player looking to enhance your skills, 
+            we're here to offer some support. Our website provides personalized summaries 
+            and visual representations of your gaming data, alongside evaluations of your 
+            match performance and feedback that might be helpful. We hope to assist you in 
+            recognizing your strengths and weaknesses, guiding you on a path to improvement. 
+            Whether you play casually or competitively, we aim to provide insights that could 
+            help you refine your strategy, improve your mastery of champions, and make your 
+            overall gameplay experience a bit better.
           </p>
         </div>
       {/if}
     </section>
-    <section id="firstSection">
+    <section id="searchbar">
       {#if index+1==2 & offset>=0.1}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
           <SearchBar {to_change} on:sending_data = {get_data} on:recap_data = {get_stats}/>
         </div>
       {/if}
     </section>
-    <section id="graph">
-      {#if position && kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
+    <section id="recap">
+      {#if kda && damage_dealt_to_champ && damage_taken && match_time && critical_strike && runes}
       {#if index+1==3 & offset>=0.2}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
-          <Recap position={position} kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
+          <Recap kda={kda} damage_dealt_to_champ={damage_dealt_to_champ} damage_taken={damage_taken} match_time={match_time} critical_strike={critical_strike} items={items} runes={runes}/>
         </div>
       {/if}
       {/if}
     </section>
-    <section class="graph">
+    <section id="graph">
       {#if champ_data}
       {#if index+1==4 & offset>=0.2}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
@@ -274,7 +299,7 @@
       {/if}
     </section>
 
-    <section class="graph">
+    <section id="graph">
     {#if gold_data}
     {#if index+1==5 & offset>=0.2}
       <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
@@ -284,10 +309,10 @@
     {/if}
     </section>
 
-    <section class = "midsection">
+    <section>
       {#if early}
       {#if index+1==6 & offset>=0.2}
-        <h4 class = "header">Champion Pool Analysis</h4>
+        <h4 class = "header" transition:fly={{ delay: 0, duration: 100, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>Champion Pool Analysis</h4>
 
         <div class="performance-wrapper">
 
@@ -360,7 +385,7 @@
       {/if}
     </section>
 
-    <section class="graph">
+    <section id="graph">
       {#if opponent_data}
       {#if index+1==7}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
@@ -370,10 +395,10 @@
       {/if}  
     </section>
 
-    <section class="midsection">
+    <section>
       {#if early}
       {#if index+1==8 & offset>=0.2}
-        <h4 class="header">Matchups Analysis</h4>
+        <h4 class="header" transition:fly={{ delay: 0, duration: 100, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>Matchups Analysis</h4>
     
         <div class="performance-wrapper">
           <div class="champ-icon-wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
@@ -478,32 +503,19 @@
 
 <style>
   @import 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
+  @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
 
-  :root{
-  /** CSS DARK THEME PRIMARY COLORS */
-  --color-primary-100: #382bf0;
-  --color-primary-200: #5e43f3;
-  --color-primary-300: #7a5af5;
-  --color-primary-400: #9171f8;
-  --color-primary-500: #a688fa;
-  --color-primary-600: #ba9ffb;
-  /** CSS DARK THEME SURFACE COLORS */
-  --color-surface-100: #121212;
-  --color-surface-200: #282828;
-  --color-surface-300: #3f3f3f;
-  --color-surface-400: #575757;
-  --color-surface-500: #717171;
-  --color-surface-600: #8b8b8b;
-  /** CSS DARK THEME MIXED SURFACE COLORS */
-  --color-surface-mixed-100: #211938;
-  --color-surface-mixed-200: #372e4c;
-  --color-surface-mixed-300: #4d4560;
-  --color-surface-mixed-400: #645d75;
-  --color-surface-mixed-500: #7c758b;
-  --color-surface-mixed-600: #958fa1;
+  main {
+    font-family: "Quicksand", sans-serif;
   }
 
   #intro {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #recap {
     display: flex;
     justify-content: center;
     text-align: center;
@@ -519,6 +531,10 @@
   .description h1{
     margin-top: 20%;
     margin-bottom: 10%;
+  }
+
+  .description p{
+    text-align: justify;
   }
 
   #intro {
@@ -554,7 +570,7 @@
   .progress-bars {
     position: absolute;
     background: rgba(170, 51, 120, 0.2) /*  40% opaque */;
-    visibility: visible;
+    visibility: hidden;
   }
 
   .header{
@@ -566,12 +582,12 @@
     height: 80vh;
     background-color: rgba(189, 207, 206, 0.212);
     text-align: center;
-    max-width: 100%; /* adjust at will */
+    max-width: 100%;
     color: black;
     padding: 1em;
   }
 
-  #firstSection {
+  #searchbar {
     display: flex;
     justify-content: center;
     text-align: center;
@@ -583,15 +599,19 @@
   }
 
   .counter {
-  width: 32%;
-  text-align: left;
-  font-size: 14 px;
-  font-weight: bold;
-  margin: 5em 5em 5em 5em;
+    width: 32%;
+    text-align: left;
+    font-size: 14 px;
+    font-weight: bold;
+    margin: 5em 5em 5em 5em;
   }
 
+<<<<<<< HEAD
 
   span.li  {display: list-item; margin-left: 2em; text-align: top;}
+=======
+  span.li  {display: list-item; margin-left: 2em}
+>>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
 
   .anim_wrapper {
     display: flex;
@@ -638,7 +658,7 @@
     flex-direction: column;
     margin-top: -20px;
     text-align: left;
-    line-height: 500%;
+    gap: 45px;
   }
 
 
@@ -648,9 +668,9 @@
     text-align: center;
     margin-top: 15px;
     font-size: 25px;
-    width: 130px;
   }
 
+<<<<<<< HEAD
 
 
   .improvement-wrapper {
@@ -668,6 +688,18 @@
     margin-right: 10px;
     margin-left: 23%;
   }
+=======
+  #improvement {
+    height: 150vh;
+  }
+
+  :global(.card) {
+    width: 15%;
+    position: relative;
+    top: 300px;
+  }
+
+>>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
   
   .champ-name-wrapper-improve{
     display: flex;

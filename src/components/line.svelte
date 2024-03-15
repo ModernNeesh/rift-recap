@@ -184,6 +184,12 @@
     <h2>Your Gold Accumulation Over Time</h2>
     <div class="line-plot">
         <div class="line-wrapper">
+            {#if tooltipPt}
+                <img
+                    src={`champion_icons/${(tooltipPt.champion).replace(/\s+/g, '')}.png`}
+                    alt={tooltipPt.champion}
+                />
+            {/if}
             <svg
                 bind:this={svg_line}
                 {width}
@@ -360,13 +366,6 @@
             </svg>
         </div>
     </div>
-
-    {#if tooltipPt}
-        <img
-            src={`champion_icons/${(tooltipPt.champion).replace(/\s+/g, '')}.png`}
-            alt={tooltipPt.champion}
-        />
-    {/if}
     
 </main>
 
@@ -390,9 +389,9 @@
 img{
     width: 50px;
     height: 50px;
-    position: relative;
-    top: -425px;
-    left: -430px;
+    position: absolute;
+    margin-left: 50px;    
+    margin-top: 30px;
 }
 
 
