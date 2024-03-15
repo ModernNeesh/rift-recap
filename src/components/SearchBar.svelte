@@ -451,26 +451,14 @@
       </InputGroup>
     </div>
 
-    <button id="searchbutton" type="button" class="btn btn-primary" disabled={loading} on:click={toggleModal}>Search</button>
-
-    <Modal isOpen={isModalOpen} backdrop="static" {toggleModal}>
-      <ModalHeader {toggleModal}>Important!</ModalHeader>
-      <ModalBody>
-        Search will take a long time, please be patient.
-      </ModalBody>
-      <ModalFooter>
-        <Button color="primary" on:click={()=>{
-          tally_data();
-          toggleModal();
-        }}>Ok</Button>
-        <Button color="secondary" on:click={toggleModal}>Cancel</Button>
-      </ModalFooter>
-    </Modal>
+    <button id="button" class="btn btn-primary" disabled={loading} on:click={()=>{
+      tally_data();
+    }}>Search</button>
 
   </div>
 
   <div class="no_account">
-    <button id="searchbutton" type="button" class="btn btn-primary" disabled={loading} on:click={()=>{
+    <button id="button" class="btn btn-primary" disabled={loading} on:click={()=>{
       region = "asia";
       gameName = "Hide on bush";
       tagLine = "KR1";
@@ -481,7 +469,8 @@
   
   <div id = "spinner">
     {#if loading}
-      <Spinner type="border" color="primary"/>
+      <p>Loading...</p>
+      <Spinner type="border" color="info"/>
     {/if}
   </div>
   
@@ -499,7 +488,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  background-color: var(--color-surface-mixed-200);
+  background-color: rgba(71, 24, 106, 0.250);
   border-radius: 50px;
   padding: 10px 20px;
   gap: 10px;
@@ -534,13 +523,13 @@
   top: 32%;
 }
 
-#searchbutton {
-  background-color: var(--color-primary-500);
+#button {
+  background-color: rgba(62, 37, 184, 0.25);
   border: none;
 }
 
-Input{
-  background-color: white;
+#button:hover {
+  background-color: rgba(184, 37, 172, 0.35);
 }
 
 
