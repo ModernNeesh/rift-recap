@@ -390,7 +390,7 @@
 img{
     width: 50px;
     height: 50px;
-    position: relative;
+    position: static;
     top: -425px;
     left: -430px;
 }
