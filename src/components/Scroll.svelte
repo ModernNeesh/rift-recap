@@ -37,6 +37,19 @@
   //Strongest point in game against each champion
   let strongest_point = {};
 
+  //List of worst overall matchups, in order
+  let worst_matchups;
+
+  //Player's champion pool, sorted by overall strength
+  let pool;
+
+  //What champion the player should play
+  let champ_to_play_against = {};
+
+
+  let champ_counters;
+
+
   let to_change = {'MonkeyKing' : 'Wukong',
                     'Nunu' : 'Nunu & Willump',
                     'Renata' : 'Renata Glasc',
@@ -59,8 +72,6 @@
 
   let icon_map = Object.fromEntries(Object.entries(to_change).map(([key, value]) => [value, key]));
 
-  let champ_names;
-
   let count, index, offset, progress;
   let width, height;
 
@@ -70,28 +81,11 @@
     opponent_data = event.detail.opponent_data;
     color = event.detail.color;
 
-    [early, late, overall] = calculateBestAndWorst(gold_data);
-    [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data, true);
+    get_best_worst_data();
 
-    function replace_average(minmax){
-      if(minmax['min'] == 'Your Average'){
-<<<<<<< HEAD
-        minmax['min'] = 'none';
-      }
-      if(minmax['max'] == 'Your Average'){
-        minmax['max'] = 'none';
-=======
-        minmax['min'] = 'None';
-      }
-      if(minmax['max'] == 'Your Average'){
-        minmax['max'] = 'None';
->>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
-      }
-    }
 
-    replace_average(early_counter);
-    replace_average(late_counter);
-    replace_average(overall_counter);
+    get_champ_to_play();
+
   }
 
   let kda, damage_dealt_to_champ, damage_taken, match_time, critical_strike, items, runes;
@@ -109,19 +103,12 @@
     let champ_names_re = await fetch('champ_names.json');
     let champ_counters_re = await fetch('champ_counters.json');
 
+    //Create a map for champion names to their icons
+    let champ_names = new Set(Object.keys(await champ_names_re.json()));
+    get_icon_map(champ_names);
 
-    champ_names = new Set(Object.keys(await champ_names_re.json()));
-    let changed_names = new Set(Object.keys(icon_map));
-    let unchanged_names = champ_names.difference(changed_names);
-    let unchanged_obj = Object.fromEntries(Array.from(unchanged_names).map(key => [key, key]));
-    Object.assign(icon_map, unchanged_obj);
-    icon_map['Leblanc'] = 'Leblanc';
-    delete icon_map['LeBlanc'];
-<<<<<<< HEAD
-    icon_map['none'] = 'None';
-=======
-    icon_map['None'] = 'None';
->>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
+    champ_counters = await champ_counters_re.json();
+    console.log(icon_map['Cho\'Gath']);
   })
   /*
     HELPER FUNCTIONS FOR LINE GRAPHS
@@ -130,9 +117,12 @@
     These functions are used in both of the line graphs
 
   */
-  function riemannSum(start, end, times, normalize = false){//Take starting index, ending index, and array of times to calculate riemann sum
+  function riemannSum(start, end, times, normalize = "none"){//Take starting index, ending index, and array of times to calculate riemann sum
         let normalizer = 1
-        if(normalize){
+        if(normalize == "strong"){
+          normalizer = (end - start)**2;
+        }
+        else if(normalize == "weak"){
           normalizer = (end - start);
         }
         if(start > times.length || start >= end){
@@ -170,8 +160,8 @@
             let champ_gold = Array.from((d3.group(by_champs.get(champ), d => d.gold)).keys());
             //Gold values for mid, early, and late game
             early_game_gold[champ] = riemannSum(0, 14, champ_gold);
-            late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold, true);
-            overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold, true);
+            late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold, 'weak');
+            overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold, 'strong');
             
             if(early_game_gold[champ]){
                 if (early_game_gold[champ] > early_game_gold[early_game['max']] || !early_game_gold[early_game['max']]){//If the early game is better than the current best
@@ -204,6 +194,13 @@
               strongest_point[champ] = get_max_diff(player_gold, champ_gold);
             }
         });
+
+        if(opponent){
+          worst_matchups = sort_by_gold(overall_gold);
+        }
+        else{
+          pool = new Set(sort_by_gold(overall_gold));
+        }
         return [early_game, late_game, overall];
     }
 
@@ -214,7 +211,67 @@
       return difference.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0) + 1;
     }
 
-    $: console.log(strongest_point);
+    function sort_by_gold(obj){
+      let obj_entries = Object.entries(obj);
+      obj_entries.sort(function(a, b) {
+            return b[1] - a[1];
+      });
+          
+      obj_entries = obj_entries.map((x) => x[0]);
+      const index = obj_entries.indexOf("Your Average");
+      if (index > -1) { // only splice array when item is found
+        obj_entries.splice(index, 1); // 2nd parameter means remove one item only
+      }
+      return obj_entries;
+    }
+
+    function get_icon_map(champ_names){
+      let changed_names = new Set(Object.keys(icon_map));
+      let unchanged_names = champ_names.difference(changed_names);
+      let unchanged_obj = Object.fromEntries(Array.from(unchanged_names).map(key => [key, key]));
+      Object.assign(icon_map, unchanged_obj);
+      icon_map['Leblanc'] = 'Leblanc';
+      delete icon_map['LeBlanc'];
+      icon_map['None'] = 'None';
+    }
+
+    function get_champ_to_play(){//For the top 3 worst counters (for which there is an available-to-play counter), get that counter
+      for (let i in worst_matchups){
+        let opp = worst_matchups[i];
+        for(let j in champ_counters[opp]){
+          let opp_counter = champ_counters[opp][j];
+          if(pool.has(opp_counter)){
+            champ_to_play_against[opp] = opp_counter;
+            break;
+          }
+        }
+        if(Object.keys(champ_to_play_against).length == 3){
+          break;
+        }
+      };
+    }
+
+    function get_best_worst_data(){//Get the best and worst champions for the player as well as counters
+      [early, late, overall] = calculateBestAndWorst(gold_data);
+      [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data, true);
+
+      function replace_average(minmax){
+        if(minmax['min'] == 'Your Average'){
+          minmax['min'] = 'None';
+        }
+        if(minmax['max'] == 'Your Average'){
+          minmax['max'] = 'None';
+        }
+      }
+
+      replace_average(early_counter);
+      replace_average(late_counter);
+      replace_average(overall_counter);
+    }
+
+    $: console.log(worst_matchups);
+    $: console.log(pool);
+    $: console.log(champ_to_play_against);
 </script>
 
 <main>
@@ -303,7 +360,7 @@
     {#if gold_data}
     {#if index+1==5 & offset>=0.2}
       <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
-        <Line {gold_data} {color}/>
+        <Line {gold_data} {color} {icon_map}/>
       </div>
     {/if}
     {/if}
@@ -389,7 +446,7 @@
       {#if opponent_data}
       {#if index+1==7}
         <div class="anim_wrapper" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0.5, easing: cubicInOut }}>
-          <OppLine {opponent_data} {color}/>
+          <OppLine {opponent_data} {color} {icon_map}/>
         </div>
       {/if}
       {/if}  
@@ -454,40 +511,65 @@
 
           <div class="champ-icon-wrapper-improve" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
             <div class="champ-icon">
-              <img class = "icon" src = "champion_icons/{icon_map[early['min']]}.png" alt = "{early['min']}" width ="50" height = "50">
+              {#if Object.keys(champ_to_play_against).length >= 1}
+                <img class = "icon" src = "champion_icons/{icon_map[worst_matchups[0]]}.png" alt = "{early['min']}" width ="50" height = "50">
+              {/if}
             </div>
             <div class="champ-icon">
-              <img class = "icon" src = "champion_icons/{icon_map[early['max']]}.png" alt = "{early['max']}" width ="50" height = "50">
+              {#if Object.keys(champ_to_play_against).length >= 2}
+                <img class = "icon" src = "champion_icons/{icon_map[worst_matchups[1]]}.png" alt = "{early['min']}" width ="50" height = "50">
+              {/if}
             </div>
             <div class="champ-icon">
-              <img class = "icon" src = "champion_icons/{icon_map[late['min']]}.png" alt = "{late['min']}" width ="50" height = "50">
+              {#if Object.keys(champ_to_play_against).length >= 3}
+                <img class = "icon" src = "champion_icons/{icon_map[worst_matchups[2]]}.png" alt = "{early['min']}" width ="50" height = "50">
+              {/if}
             </div>
           </div>
 
           <div class="champ-name-wrapper-improve" transition:fly={{ delay: 200, duration: 500, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
             <div class="champ-name-improve">
-              {early['min']}
+              {#if Object.keys(champ_to_play_against).length >= 1}
+                {worst_matchups[0]}
+              {/if}
             </div>
             <div class="champ-name-improve">
-              {early['max']}
+              {#if Object.keys(champ_to_play_against).length >= 2}
+                {worst_matchups[1]}
+              {/if}
             </div>
             <div class="champ-name-improve">
-              {late['min']}
+              {#if Object.keys(champ_to_play_against).length >= 3}
+                {worst_matchups[2]}
+              {/if}
             </div>
           </div>
 
           <div class="stage-wrapper-improve">
+            {#if Object.keys(champ_to_play_against).length >= 1}
             <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
-              To beat {early['min']}:
-              <span class = "li"> asdf </span>
-              <span class = "li"> asdf </span>
+              To beat <text font-weight = "bold">{worst_matchups[0]}</text>:
+              <span class = "li"> Play {champ_to_play_against[worst_matchups[0]]}, since they are the best counter to {worst_matchups[0]} 
+                                  in your champion pool.</span>
+              <span class = "li"> Try to play for a lead around the {strongest_point[worst_matchups[0]]} minute mark, since that is when you tend to be strongest in this matchup. </span>
             </div>
-            <div class="stage" transition:fly={{ delay: 600, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
-              <p>Strongest Early Game Champion</p>
+            {/if}
+            {#if Object.keys(champ_to_play_against).length >= 2}
+            <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              To beat {worst_matchups[1]}:
+              <span class = "li"> Play {champ_to_play_against[worst_matchups[1]]}, since they are the best counter to {worst_matchups[1]} 
+                                  in your champion pool.</span>
+              <span class = "li"> Try to play for a lead around the {strongest_point[worst_matchups[1]]} minute mark, since that is when you tend to be strongest in this matchup. </span>
             </div>
-            <div class="stage" transition:fly={{ delay: 800, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
-              <p>Weakest Late Game Champion</p>
+            {/if}
+            {#if Object.keys(champ_to_play_against).length >= 3}
+            <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              To beat {worst_matchups[2]}:
+              <span class = "li"> Play {champ_to_play_against[worst_matchups[2]]}, since they are the best counter to {worst_matchups[2]} 
+                                  in your champion pool.</span>
+              <span class = "li"> Try to play for a lead around the {strongest_point[worst_matchups[2]]} minute mark, since that is when you tend to be strongest in this matchup. </span>
             </div>
+            {/if}
           </div>
 
         </div>
@@ -606,12 +688,8 @@
     margin: 5em 5em 5em 5em;
   }
 
-<<<<<<< HEAD
 
   span.li  {display: list-item; margin-left: 2em; text-align: top;}
-=======
-  span.li  {display: list-item; margin-left: 2em}
->>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
 
   .anim_wrapper {
     display: flex;
@@ -670,7 +748,6 @@
     font-size: 25px;
   }
 
-<<<<<<< HEAD
 
 
   .improvement-wrapper {
@@ -688,7 +765,6 @@
     margin-right: 10px;
     margin-left: 23%;
   }
-=======
   #improvement {
     height: 150vh;
   }
@@ -699,7 +775,6 @@
     top: 300px;
   }
 
->>>>>>> a93f678d51f50efbf08f1a71c86845b16f472b36
   
   .champ-name-wrapper-improve{
     display: flex;
@@ -722,10 +797,10 @@
     flex-direction: column;
     justify-content: start;
     text-align: left;
-    gap: 43px;
+    gap: 20px;
     margin-left: 12%;
-    margin-top: 0px;
-    font-size: 17px;
+    margin-top: 30px;
+    font-size: 16px;
     overflow: hidden;
   }
 </style>

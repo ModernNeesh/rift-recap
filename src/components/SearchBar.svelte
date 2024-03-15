@@ -25,7 +25,7 @@
   let gameName;
   let tagLine;
   let loading = false;
-  const NUM_MATCHES = 2;
+  const NUM_MATCHES = 20;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 

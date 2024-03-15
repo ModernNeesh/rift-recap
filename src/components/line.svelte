@@ -3,6 +3,7 @@
 
     export let gold_data;
     export let color;
+    export let icon_map;
 
     const width = 1100;
     const height = 600;
@@ -186,7 +187,7 @@
         <div class="line-wrapper">
             {#if tooltipPt}
                 <img
-                    src={`champion_icons/${(tooltipPt.champion).replace(/\s+/g, '')}.png`}
+                    src={`champion_icons/${icon_map[(tooltipPt.champion).replace(/\s+/g, '')]}.png`}
                     alt={tooltipPt.champion}
                 />
             {/if}
