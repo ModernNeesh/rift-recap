@@ -28,6 +28,10 @@
   let late_counter;
   let overall_counter;
 
+
+  //Strongest point in game against each champion
+  let strongest_point = {};
+
   let to_change = {'MonkeyKing' : 'Wukong',
                     'Nunu' : 'Nunu & Willump',
                     'Renata' : 'Renata Glasc',
@@ -54,8 +58,6 @@
 
   let count, index, offset, progress;
   let width, height;
-  let readme;
-  let line;
 
   function get_data(event){
     gold_data = event.detail.gold_data;
@@ -64,14 +66,14 @@
     color = event.detail.color;
 
     [early, late, overall] = calculateBestAndWorst(gold_data);
-    [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data);
+    [early_counter, late_counter, overall_counter] = calculateBestAndWorst(opponent_data, true);
 
     function replace_average(minmax){
       if(minmax['min'] == 'Your Average'){
-        minmax['min'] = 'none of the champions';
+        minmax['min'] = 'none';
       }
       if(minmax['max'] == 'Your Average'){
-        minmax['max'] = 'none of the champions';
+        minmax['max'] = 'none';
       }
     }
 
@@ -94,6 +96,9 @@
 
   onMount(async () => {
     let champ_names_re = await fetch('champ_names.json');
+    let champ_counters_re = await fetch('champ_counters.json');
+
+
     champ_names = new Set(Object.keys(await champ_names_re.json()));
     let changed_names = new Set(Object.keys(icon_map));
     let unchanged_names = champ_names.difference(changed_names);
@@ -101,7 +106,7 @@
     Object.assign(icon_map, unchanged_obj);
     icon_map['Leblanc'] = 'Leblanc';
     delete icon_map['LeBlanc'];
-    icon_map['none of the champions'] = 'None';
+    icon_map['none'] = 'None';
   })
   /*
     HELPER FUNCTIONS FOR LINE GRAPHS
@@ -110,7 +115,11 @@
     These functions are used in both of the line graphs
 
   */
-  function riemannSum(start, end, times){//Take starting index, ending index, and array of times to calculate riemann sum
+  function riemannSum(start, end, times, normalize = false){//Take starting index, ending index, and array of times to calculate riemann sum
+        let normalizer = 1
+        if(normalize){
+          normalizer = (end - start);
+        }
         if(start > times.length || start >= end){
             return null;
         }
@@ -118,10 +127,10 @@
             return 0.5*(times[start] + times[end])
         }
         let sum = arr => arr.reduce((a, b) => a + b);
-        return 0.5*(times[start] + 2*sum(times.slice(start+1,end)) + times[end]) / (end - start);
+        return 0.5*(times[start] + 2*sum(times.slice(start+1,end)) + times[end]) / normalizer;
     }
 
-  function calculateBestAndWorst(data){//Get the worst and best champs in the early and late game as well as overall
+  function calculateBestAndWorst(data, opponent = false){//Get the worst and best champs in the early and late game as well as overall
         let first_champ = data[0].champion;
         //Best and worst early, late and overall champs
         let early_game = {'min': first_champ, 'max' : first_champ};
@@ -134,13 +143,20 @@
         let overall_gold = {};
 
 
+        let player_gold = [];
+
         let by_champs = d3.group(data, d => d.champion);
+        
+        if(opponent){
+          player_gold = Array.from((d3.group(by_champs.get("Your Average"), d => d.gold)).keys());
+        }
+
         by_champs.keys().forEach(champ => {
             let champ_gold = Array.from((d3.group(by_champs.get(champ), d => d.gold)).keys());
             //Gold values for mid, early, and late game
             early_game_gold[champ] = riemannSum(0, 14, champ_gold);
-            late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold);
-            overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold);
+            late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold, true);
+            overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold, true);
             
             if(early_game_gold[champ]){
                 if (early_game_gold[champ] > early_game_gold[early_game['max']] || !early_game_gold[early_game['max']]){//If the early game is better than the current best
@@ -168,11 +184,22 @@
                     overall['min'] = champ;
                 }
             }
+
+            if(opponent){
+              strongest_point[champ] = get_max_diff(player_gold, champ_gold);
+            }
         });
-        console.log(overall_gold);
         return [early_game, late_game, overall];
     }
 
+    function get_max_diff(player_arr, opponent_arr){
+      var difference = player_arr.map(function(item, index) {
+        return item - opponent_arr[index];
+      });
+      return difference.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0) + 1;
+    }
+
+    $: console.log(strongest_point);
 </script>
 
 <main>
@@ -394,20 +421,54 @@
     
 
     <section id="improvement">
-      <p class = "header">How To Improve</p>
+      {#if early}
+      {#if index+1==9 & offset>=0.2}
+        <h4 class = "header">How to Improve</h4>
 
-      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Irelia.png" alt = "Sett" width ="20" height = "20"> Irelia:
-        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Irelia in your champion pool.</span>
-        <span class=li>Try to play for the lead more around the 3 minute mark, as that is when you tend to have the biggest advantage.</span>
-      </p>
-      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Tryndamere.png" alt = "Sett" width ="20" height = "20"> Tryndamere:
-        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Tryndamere in your champion pool.</span>
-        <span class=li>Try to play for the lead more around the 39 minute mark, as that is when you tend to have the biggest advantage.</span>
-      </p>
-      <p class = "counter">In order to beat <img class = "icon" src = "champion_icons/Fiora.png" alt = "Sett" width ="20" height = "20"> Fiora:
-        <span class=li>Play <img class = "icon" src = "champion_icons/Sett.png" alt = "Sett" width ="20" height = "20">Sett, since Sett is the hardest counter to Fiora in your champion pool.</span>
-        <span class=li>Try to play for the lead more around the 30 minute mark, as that is when you tend to have the biggest advantage.</span>
-      </p>
+        <div class="improvement-wrapper">
+
+          <div class="champ-icon-wrapper-improve" transition:fly={{ delay: 0, duration: 300, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[early['min']]}.png" alt = "{early['min']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[early['max']]}.png" alt = "{early['max']}" width ="50" height = "50">
+            </div>
+            <div class="champ-icon">
+              <img class = "icon" src = "champion_icons/{icon_map[late['min']]}.png" alt = "{late['min']}" width ="50" height = "50">
+            </div>
+          </div>
+
+          <div class="champ-name-wrapper-improve" transition:fly={{ delay: 200, duration: 500, x: 0, y: -10, opacity: 0, easing: cubicInOut }}>
+            <div class="champ-name-improve">
+              {early['min']}
+            </div>
+            <div class="champ-name-improve">
+              {early['max']}
+            </div>
+            <div class="champ-name-improve">
+              {late['min']}
+            </div>
+          </div>
+
+          <div class="stage-wrapper-improve">
+            <div class="stage" transition:fly={{ delay: 400, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              To beat {early['min']}:
+              <span class = "li"> asdf </span>
+              <span class = "li"> asdf </span>
+            </div>
+            <div class="stage" transition:fly={{ delay: 600, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Strongest Early Game Champion</p>
+            </div>
+            <div class="stage" transition:fly={{ delay: 800, duration: 1000, x: 1000, y: 0, opacity: 0, easing: cubicInOut }}>
+              <p>Weakest Late Game Champion</p>
+            </div>
+          </div>
+
+        </div>
+        
+      {/if}
+      {/if}
     </section>
   </div>
 
@@ -530,7 +591,7 @@
   }
 
 
-  span.li  {display: list-item; margin-left: 2em}
+  span.li  {display: list-item; margin-left: 2em; text-align: top;}
 
   .anim_wrapper {
     display: flex;
@@ -592,9 +653,47 @@
 
 
 
-  #improvement {
-    height: 150vh;
+  .improvement-wrapper {
+    display: flex;
+    text-align: center;
+    align-items: center;
   }
 
+  .champ-icon-wrapper-improve{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    gap: 50px;
+    margin-right: 10px;
+    margin-left: 23%;
+  }
   
+  .champ-name-wrapper-improve{
+    display: flex;
+    flex-direction: column;
+    margin-top: -20px;
+    text-align: left;
+    line-height: 700%;
+  }
+
+  .champ-name-improve {
+    display: flex;
+    justify-content: left;
+    text-align: center;
+    margin-top: 15px;
+    font-size: 25px;
+    width: 130px;
+  }
+  .stage-wrapper-improve{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    text-align: left;
+    gap: 43px;
+    margin-left: 12%;
+    margin-top: 0px;
+    font-size: 17px;
+    overflow: hidden;
+  }
 </style>
