@@ -314,7 +314,7 @@
     <section id="intro">
       {#if index!=1}
         <div class="description" transition:fly={{ delay: 0, duration: 300, x: 0, y: -20, opacity: 0.5, easing: cubicInOut }}>
-          <h1>Welcome to our website</h1>
+          <h1>Welcome to Rift Recap</h1>
           <p>
             If you're a League of Legends player looking to enhance your skills, 
             we're here to offer some support. Our website provides personalized summaries 
