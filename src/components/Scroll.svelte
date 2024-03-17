@@ -158,8 +158,6 @@
 
         by_champs.keys().forEach(champ => {
             let champ_gold = by_champs.get(champ).map((d) => d.gold);
-            console.log(champ);
-            console.log(champ_gold);
             //Gold values for mid, early, and late game
             early_game_gold[champ] = riemannSum(0, 14, champ_gold);
             late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold, 'weak');
