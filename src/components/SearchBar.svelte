@@ -21,15 +21,20 @@
 
   const dispatch = createEventDispatcher();
 
+  //Player inputs these
   let region;
   let gameName;
   let tagLine;
+
+  //Booleans for errors and loading
   let loading = false;
+  let error_message;
   const NUM_MATCHES = 20;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 
 
+  
   /*
     API CALL FUNCTIONS
     --------------------
@@ -56,8 +61,9 @@
       let json = await response.json();
       return json.puuid;
     } catch (error) {
-      console.error("Fetch error: ", error.message);
+      console.log("Fetch error: ", error.message);
       // handle the error
+      return;
     }
   }
 
@@ -80,8 +86,9 @@
       let json = await response.json();
       return json;
     } catch (error) {
-      console.error("Fetch error: ", error.message);
+      console.log("Fetch error: ", error.message);
       // handle the error
+      return;
     }
   }
 
@@ -106,6 +113,7 @@
     } catch (error) {
       console.error("Fetch error: ", error.message);
       // handle the error
+      return;
     }
   }
 
@@ -128,8 +136,9 @@
       let json = await response.json();
       return json.info;
     } catch (error) {
-      console.error("Fetch error: ", error.message);
+      console.log("Fetch error: ", error.message);
       // handle the error
+      return;
     }
   }
 
@@ -367,17 +376,34 @@
   }
 
   async function tally_data() {
-
+    error_message = null;
     loading = true;
     
     
     const puuid = await get_puuid_by_name_tag(region, gameName, tagLine);
     const match_ids = await get_most_recent_match_ids_by_puuid(region, puuid, NUM_MATCHES);
+
+    if(!puuid || !match_ids){
+      loading = false;
+      return "This player does not exist; there was an error retrieving the data.";
+    }
+    else if (match_ids.length == 0){
+      loading = false;
+      return "This player has no matches played in this region.";
+    }
     const match_details = {};
     const match_timelines = {};
     for (let match_id of match_ids) {
      match_details[match_id] = await get_match_detail_by_match_id(region, match_id);
+     if(!match_details[match_id]){
+      loading = false;
+      return "There was an error retrieving the data for this player. Please try a different Riot ID."
+     }
      match_timelines[match_id] = await get_match_timeline_by_match_id(region, match_id);
+     if(!match_timelines[match_id]){
+      loading = false;
+      return "There was an error retrieving the data for this player. Please try a different Riot ID."
+     }
     }
 
     /*
@@ -417,6 +443,7 @@
     dispatch('sending_data', {gold_data: clean_gold_data, champ_data: champs_played_data, opponent_data: clean_opp_gold_data.concat(overall_data), color: color_scheme});
     // reenable the search button
     loading = false;
+    return 1;
   }
 
 
@@ -451,19 +478,33 @@
       </InputGroup>
     </div>
 
-    <button id="button" class="btn btn-primary" disabled={loading} on:click={()=>{
-      tally_data();
+    <button id="button" class="btn btn-primary" disabled={loading} on:click={async ()=>{
+      error_message = null;
+      if(region && gameName && tagLine){
+        let result = await tally_data();
+        if(result != 1){
+          error_message = result;
+        }
+      }
+      else{
+        error_message = "Please enter a valid value for all 3 of the fields above, or press the button above if you don't play League.";
+      }  
+
     }}>Search</button>
 
   </div>
 
   <div class="no_account">
-    <button id="button" class="btn btn-primary" disabled={loading} on:click={()=>{
+    <button id="button" class="btn btn-primary" disabled={loading} on:click={async ()=>{
       region = "asia";
       gameName = "Hide on bush";
       tagLine = "KR1";
 
-      tally_data();
+      let result = await tally_data();
+      if(result != 1){
+        console.log(result);
+        error_message = "There was an unexpected error. Please try again.";
+      }
     }}>Click here if you don't have a Riot account</button>
   </div>
   
@@ -474,6 +515,11 @@
     {/if}
   </div>
   
+  <div id = "error_message">
+    {#if error_message}
+      {error_message}
+    {/if}
+  </div>
 </main>
 
 <style>

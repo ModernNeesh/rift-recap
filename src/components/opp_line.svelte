@@ -190,7 +190,7 @@
             {#if tooltipPt}
             {#if tooltipPt.champion !== "Your Average"}
                 <img
-                    src={`champion_icons/${icon_map[(tooltipPt.champion).replace(/\s+/g, '')]}.png`}
+                    src={`champion_icons/${icon_map[(tooltipPt.champion)]}.png`}
                     alt={tooltipPt.champion}
                 />
             {/if}

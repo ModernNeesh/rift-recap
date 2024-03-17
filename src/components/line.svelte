@@ -24,6 +24,7 @@
     let checked_champs = {};
     let select_deselect_all = true;
 
+    $: console.log(gold_data);
     // map time to x-coordinate on screen
     let x = d3
         .scaleLinear()
@@ -35,10 +36,12 @@
         .domain(d3.extent(gold_data, (d) => d.gold))
         .range([height - marginBottom, marginTop]);
 
+    $: console.log(d3.extent(gold_data, (d) => d.time));
     // make line
     $: line = d3
         .line()
         .x((d) => x(d.time)).y((d) => y(d.gold));
+
 
     // group data by champion
     let grouped;
@@ -187,7 +190,7 @@
         <div class="line-wrapper">
             {#if tooltipPt}
                 <img
-                    src={`champion_icons/${icon_map[(tooltipPt.champion).replace(/\s+/g, '')]}.png`}
+                    src={`champion_icons/${icon_map[(tooltipPt.champion)]}.png`}
                     alt={tooltipPt.champion}
                 />
             {/if}

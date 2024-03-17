@@ -71,7 +71,6 @@
                     'XinZhao' : 'Xin Zhao'};
 
   let icon_map = Object.fromEntries(Object.entries(to_change).map(([key, value]) => [value, key]));
-
   let count, index, offset, progress;
   let width, height;
 
@@ -83,6 +82,7 @@
 
     get_best_worst_data();
 
+    
 
     get_champ_to_play();
 
@@ -100,15 +100,14 @@
   }
 
   onMount(async () => {
+    
     let champ_names_re = await fetch('champ_names.json');
     let champ_counters_re = await fetch('champ_counters.json');
 
     //Create a map for champion names to their icons
     let champ_names = new Set(Object.keys(await champ_names_re.json()));
     get_icon_map(champ_names);
-
     champ_counters = await champ_counters_re.json();
-    console.log(icon_map['Cho\'Gath']);
   })
   /*
     HELPER FUNCTIONS FOR LINE GRAPHS
@@ -118,7 +117,8 @@
 
   */
   function riemannSum(start, end, times, normalize = "none"){//Take starting index, ending index, and array of times to calculate riemann sum
-        let normalizer = 1
+        let normalizer = 1;
+        
         if(normalize == "strong"){
           normalizer = (end - start)**2;
         }
@@ -157,12 +157,14 @@
         }
 
         by_champs.keys().forEach(champ => {
-            let champ_gold = Array.from((d3.group(by_champs.get(champ), d => d.gold)).keys());
+            let champ_gold = by_champs.get(champ).map((d) => d.gold);
+            console.log(champ);
+            console.log(champ_gold);
             //Gold values for mid, early, and late game
             early_game_gold[champ] = riemannSum(0, 14, champ_gold);
             late_game_gold[champ] = riemannSum(30, champ_gold.length-1, champ_gold, 'weak');
             overall_gold[champ] = riemannSum(0, champ_gold.length-1, champ_gold, 'strong');
-            
+
             if(early_game_gold[champ]){
                 if (early_game_gold[champ] > early_game_gold[early_game['max']] || !early_game_gold[early_game['max']]){//If the early game is better than the current best
                     early_game['max'] = champ;
@@ -268,10 +270,6 @@
       replace_average(late_counter);
       replace_average(overall_counter);
     }
-
-    $: console.log(worst_matchups);
-    $: console.log(pool);
-    $: console.log(champ_to_play_against);
 </script>
 
 <main>
@@ -294,7 +292,7 @@
     <div>
       <Card theme="dark">
         <CardBody>
-          <CardText>Search will take a while, please be patient!</CardText>
+          <CardText>Search will take a while, please be patient and don't scroll!</CardText>
         </CardBody>
       </Card>
     </div>
