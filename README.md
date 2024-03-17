@@ -43,7 +43,7 @@ Finally, you'll see some tips on how to beat your three worst matchups. Specific
 
 For our website, we chose a light gradient texture that would be easy on the eyes. It also allows the reader to better see the line graphs and bar graphs. We also decided to make our website scrollable, since this makes it easy to move through each section and analyze them one at a time.
 
-We decided to use mutlicolored bar and line graphs so that our viewers could easily see the difference between the bars and lines and be able to tell them apart. We also added animation so that the visualizations and the following summaries would be more eye-catching.
+We decided to use mutlicolored bar and line graphs so that our viewers could easily see the difference between the bars and lines and be able to tell them apart. We also added animation so that the visualizations and the following summaries would be more eye-catching. For the best-and-worst summary sections specifically, the icons appear first before the descriptions fly in so that the reader can identify each champion with their description as they appear--for example, they may see the icon for Tristana at first, and then the description of "Strongest Champion Consistently" will fly in, allowing the reader to more easily attribute the two to each other. 
 
 We structured our website in accordance with the and-but-therefore structure. In essence:
 
