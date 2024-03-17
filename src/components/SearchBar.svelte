@@ -29,7 +29,7 @@
   //Booleans for errors and loading
   let loading = false;
   let error_message;
-  const NUM_MATCHES = 20;
+  const NUM_MATCHES = 30;
   
   const validRegions = ["americas", "asia", "europe", "sea"];
 
@@ -397,12 +397,12 @@
      match_details[match_id] = await get_match_detail_by_match_id(region, match_id);
      if(!match_details[match_id]){
       loading = false;
-      return "There was an error retrieving the data for this player. Please try a different Riot ID."
+      return "There was an error retrieving the data for this player. Please try a different Riot ID, or use the one provided below."
      }
      match_timelines[match_id] = await get_match_timeline_by_match_id(region, match_id);
      if(!match_timelines[match_id]){
       loading = false;
-      return "There was an error retrieving the data for this player. Please try a different Riot ID."
+      return "There was an error retrieving the data for this player. Please try a different Riot ID, or use the one provided below."
      }
     }
 
@@ -487,7 +487,7 @@
         }
       }
       else{
-        error_message = "Please enter a valid value for all 3 of the fields above, or press the button above if you don't play League.";
+        error_message = "Please enter a valid value for all 3 of the fields above, or press the button below if you don't play League.";
       }  
 
     }}>Search</button>
