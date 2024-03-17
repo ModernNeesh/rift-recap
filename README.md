@@ -48,8 +48,11 @@ We decided to use mutlicolored bar and line graphs so that our viewers could eas
 We structured our website in accordance with the and-but-therefore structure. In essence:
 
 You are presented with an overall recap and the champions you play most, **AND**
+<br>
 You can see how well you do on the various champions in your pool, **BUT**
+<br>
 The following champions depicted in the line graph are your worst counters, **THEREFORE**
+<br>
 You should take note of the following personalized tips in order to improve.
 
 
